@@ -1,52 +1,75 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Search, Menu, X, ArrowRight, Scale, Check } from "lucide-react";
 
 export function Logo({ inverted }: { inverted?: boolean }) {
-  const textColor = inverted ? "#FFFFFF" : "#1A2B3C";
+  const textColor = inverted ? "#F3F0EE" : "#141413";
   return (
-    <Link to="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
+    <Link
+      to="/"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "10px",
+        textDecoration: "none",
+      }}
+    >
+      {/* Brand Icon: Interlocking Circles Motif */}
       <div
         style={{
-          width: "30px",
-          height: "30px",
-          borderRadius: "7px",
-          background: "linear-gradient(135deg, #0EA5A0, #22C55E)",
+          position: "relative",
+          width: "38px",
+          height: "26px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 2px 6px rgba(14,165,160,0.25)",
         }}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" />
-        </svg>
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            backgroundColor: "#EB001B",
+            opacity: 0.95,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: "14px",
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            backgroundColor: "#F79E1B",
+            opacity: 0.95,
+            mixBlendMode: "multiply",
+          }}
+        />
       </div>
-      <span
-        style={{
-          fontFamily: "'Manrope', sans-serif",
-          fontWeight: 800,
-          fontSize: "17px",
-          color: textColor,
-          letterSpacing: "-0.025em",
-        }}
-      >
-        CrediNove <span style={{ color: "#0EA5A0", fontWeight: 700 }}>AI</span>
-      </span>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span
+          style={{
+            fontFamily: "'Sofia Sans', 'Inter', sans-serif",
+            fontWeight: 700,
+            fontSize: "20px",
+            color: textColor,
+            letterSpacing: "-0.03em",
+            lineHeight: 1,
+          }}
+        >
+          CrediNove
+        </span>
+      </div>
     </Link>
   );
 }
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -65,248 +88,413 @@ export function Navbar() {
     }
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    const q = searchQuery.toLowerCase();
+    setSearchOpen(false);
+    if (q.includes("judge") || q.includes("metric") || q.includes("model")) {
+      navigate("/judge");
+    } else if (q.includes("assess") || q.includes("score") || q.includes("apply")) {
+      navigate("/assessment");
+    } else if (q.includes("service") || q.includes("feature")) {
+      handleNavAnchor("services");
+    } else if (q.includes("how") || q.includes("work")) {
+      handleNavAnchor("how-it-works");
+    } else {
+      navigate("/assessment");
+    }
+  };
+
   return (
-    <header
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        background: "rgba(255, 255, 255, 0.96)",
-        backdropFilter: "blur(10px)",
-        borderBottom: "1px solid #E5E7EB",
-        boxShadow: "0 1px 6px rgba(0,0,0,0.04)",
-      }}
-    >
+    <>
       <div
         style={{
-          maxWidth: "1280px",
-          margin: "0 auto",
-          padding: "0 24px",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          position: "fixed",
+          top: "18px",
+          left: 0,
+          right: 0,
+          zIndex: 90,
+          padding: "0 16px",
+          pointerEvents: "none",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Logo />
-          {isJudge && (
-            <span
-              className="badge badge-teal hidden sm:inline-flex"
-              style={{ fontSize: 11, letterSpacing: "0.06em", fontWeight: 700 }}
-            >
-              JUDGE MODE
-            </span>
-          )}
-        </div>
+        <header
+          style={{
+            maxWidth: "1240px",
+            margin: "0 auto",
+            backgroundColor: "#FFFFFF",
+            borderRadius: "999px",
+            boxShadow: "0px 4px 24px 0px rgba(0, 0, 0, 0.06)",
+            border: "1px solid rgba(20, 20, 19, 0.06)",
+            padding: "10px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pointerEvents: "auto",
+            transition: "all 0.3s ease",
+          }}
+        >
+          {/* Logo & Sub-tag */}
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <Logo />
+            {isJudge && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  backgroundColor: "rgba(243, 115, 56, 0.12)",
+                  color: "#CF4500",
+                }}
+                className="hidden sm:inline-flex"
+              >
+                <Scale size={13} strokeWidth={2.2} />
+                JUDGE MODE
+              </span>
+            )}
+          </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link
-            to="/"
-            style={{
-              fontSize: "14px",
-              fontWeight: isLanding ? 700 : 500,
-              color: isLanding ? "#0EA5A0" : "#4B5563",
-              textDecoration: "none",
-            }}
-          >
-            Home
-          </Link>
-          <button
-            onClick={() => handleNavAnchor("about")}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#4B5563",
-              cursor: "pointer",
-            }}
-          >
-            About
-          </button>
-          <button
-            onClick={() => handleNavAnchor("services")}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#4B5563",
-              cursor: "pointer",
-            }}
-          >
-            Services
-          </button>
-          <button
-            onClick={() => handleNavAnchor("how-it-works")}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#4B5563",
-              cursor: "pointer",
-            }}
-          >
-            How It Works
-          </button>
-          <Link
-            to="/assessment"
-            style={{
-              fontSize: "14px",
-              fontWeight: isAssessment ? 700 : 500,
-              color: isAssessment ? "#0EA5A0" : "#4B5563",
-              textDecoration: "none",
-            }}
-          >
-            Assessment
-          </Link>
-          {isResults && (
-            <Link
-              to="/assessment/results"
-              style={{
-                fontSize: "14px",
-                fontWeight: 700,
-                color: "#0EA5A0",
-                textDecoration: "none",
-              }}
-            >
-              Results
-            </Link>
-          )}
-          <Link
-            to="/judge"
-            style={{
-              fontSize: "13px",
-              fontWeight: isJudge ? 700 : 600,
-              color: isJudge ? "#0EA5A0" : "#6B7280",
-              textDecoration: "none",
-              background: isJudge ? "#E6F7F7" : "#F3F4F6",
-              padding: "4px 10px",
-              borderRadius: "6px",
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
-            <span>⚖️</span>
-            Judge Analytics
-          </Link>
-        </nav>
-
-        {/* Action buttons */}
-        <div className="hidden md:flex items-center gap-3">
-          {!isJudge && (
-            <Link
-              to="/judge"
-              className="btn-ghost"
-              style={{ fontSize: "13px", padding: "7px 14px", color: "#1A2B3C" }}
-            >
-              Judge Dashboard
-            </Link>
-          )}
-          {!isAssessment && (
-            <Link
-              to="/assessment"
-              className="btn-primary"
-              style={{ fontSize: "13.5px", padding: "8px 18px" }}
-            >
-              Start Assessment →
-            </Link>
-          )}
-          {isAssessment && (
+          {/* Center Links (Desktop) */}
+          <nav className="hidden lg:flex items-center" style={{ gap: "36px" }}>
             <Link
               to="/"
-              className="btn-ghost"
-              style={{ fontSize: "13px", padding: "7px 14px" }}
+              style={{
+                fontSize: "15px",
+                fontWeight: isLanding ? 600 : 450,
+                color: "#141413",
+                textDecoration: "none",
+                letterSpacing: "-0.02em",
+                borderBottom: isLanding ? "2px solid #141413" : "2px solid transparent",
+                paddingBottom: "2px",
+                transition: "border-color 0.2s ease",
+              }}
             >
-              ← Back to Home
+              Overview
             </Link>
-          )}
-        </div>
+            <button
+              onClick={() => handleNavAnchor("services")}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "0 0 2px 0",
+                fontSize: "15px",
+                fontWeight: 450,
+                color: "#141413",
+                cursor: "pointer",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Services
+            </button>
+            <button
+              onClick={() => handleNavAnchor("how-it-works")}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "0 0 2px 0",
+                fontSize: "15px",
+                fontWeight: 450,
+                color: "#141413",
+                cursor: "pointer",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              How It Works
+            </button>
+            <Link
+              to="/assessment"
+              style={{
+                fontSize: "15px",
+                fontWeight: isAssessment ? 600 : 450,
+                color: "#141413",
+                textDecoration: "none",
+                letterSpacing: "-0.02em",
+                borderBottom: isAssessment ? "2px solid #141413" : "2px solid transparent",
+                paddingBottom: "2px",
+              }}
+            >
+              Assessment
+            </Link>
+            <Link
+              to="/judge"
+              style={{
+                fontSize: "15px",
+                fontWeight: isJudge ? 600 : 450,
+                color: "#141413",
+                textDecoration: "none",
+                letterSpacing: "-0.02em",
+                borderBottom: isJudge ? "2px solid #141413" : "2px solid transparent",
+                paddingBottom: "2px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <Scale size={14} strokeWidth={2} />
+              Judge Analytics
+            </Link>
+          </nav>
 
-        {/* Mobile menu toggle */}
-        <button
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ background: "none", border: "none", color: "#1A2B3C", cursor: "pointer", padding: "6px" }}
-          aria-label="Toggle menu"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {mobileOpen ? (
-              <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
+          {/* Right Action Tools */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Search circular toggle */}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                border: "1.5px solid rgba(20, 20, 19, 0.12)",
+                background: searchOpen ? "#141413" : "#FFFFFF",
+                color: searchOpen ? "#F3F0EE" : "#141413",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              title="Search CrediNove platform"
+              aria-label="Toggle search"
+            >
+              <Search size={17} strokeWidth={2} />
+            </button>
+
+            {/* Main Action Pill */}
+            {!isAssessment ? (
+              <Link
+                to="/assessment"
+                className="btn-primary hidden sm:inline-flex"
+                style={{
+                  fontSize: "14px",
+                  padding: "7px 20px",
+                  borderRadius: "20px",
+                }}
+              >
+                <span>Start Assessment</span>
+                <ArrowRight size={15} strokeWidth={2.2} />
+              </Link>
             ) : (
-              <>
-                <line x1="4" y1="7" x2="20" y2="7" strokeLinecap="round" />
-                <line x1="4" y1="12" x2="20" y2="12" strokeLinecap="round" />
-                <line x1="4" y1="17" x2="20" y2="17" strokeLinecap="round" />
-              </>
+              <Link
+                to="/"
+                className="btn-secondary hidden sm:inline-flex"
+                style={{
+                  fontSize: "14px",
+                  padding: "7px 20px",
+                  borderRadius: "20px",
+                }}
+              >
+                <span>Back to Overview</span>
+              </Link>
             )}
-          </svg>
-        </button>
+
+            {/* Mobile Hamburger Toggle */}
+            <button
+              className="lg:hidden"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background: "transparent",
+                border: "1.5px solid rgba(20, 20, 19, 0.12)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#141413",
+                cursor: "pointer",
+              }}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </header>
+
+        {/* Expandable Search Bar */}
+        {searchOpen && (
+          <div
+            style={{
+              maxWidth: "600px",
+              margin: "12px auto 0",
+              pointerEvents: "auto",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "999px",
+              boxShadow: "0px 16px 36px 0px rgba(0, 0, 0, 0.12)",
+              border: "1.5px solid #141413",
+              padding: "6px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+            className="animate-fade-in"
+          >
+            <Search size={18} color="#696969" strokeWidth={2} />
+            <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: "flex" }}>
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search models, assessment, services, explainability..."
+                style={{
+                  width: "100%",
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  fontSize: "14px",
+                  color: "#141413",
+                  padding: "6px 0",
+                }}
+              />
+            </form>
+            <button
+              type="button"
+              onClick={() => setSearchOpen(false)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#696969",
+                cursor: "pointer",
+                padding: "4px",
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile Menu Overlay */}
       {mobileOpen && (
         <div
           style={{
-            background: "white",
-            borderTop: "1px solid #E5E7EB",
-            padding: "16px 24px 24px",
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(20, 20, 19, 0.4)",
+            backdropFilter: "blur(4px)",
+            zIndex: 80,
             display: "flex",
             flexDirection: "column",
-            gap: "12px",
+            justifyContent: "flex-start",
+            padding: "90px 16px 24px",
           }}
-          className="md:hidden"
+          onClick={() => setMobileOpen(false)}
         >
-          <Link
-            to="/"
-            onClick={() => setMobileOpen(false)}
-            style={{ padding: "8px 0", color: "#1A2B3C", fontWeight: 600, textDecoration: "none" }}
+          <div
+            style={{
+              backgroundColor: "#FCFBFA",
+              borderRadius: "32px",
+              padding: "24px",
+              boxShadow: "0px 24px 48px rgba(0, 0, 0, 0.15)",
+              border: "1px solid rgba(20, 20, 19, 0.08)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="animate-fade-in"
           >
-            Home
-          </Link>
-          <button
-            onClick={() => handleNavAnchor("about")}
-            style={{ textAlign: "left", background: "none", border: "none", padding: "8px 0", color: "#4B5563", fontSize: "15px" }}
-          >
-            About
-          </button>
-          <button
-            onClick={() => handleNavAnchor("services")}
-            style={{ textAlign: "left", background: "none", border: "none", padding: "8px 0", color: "#4B5563", fontSize: "15px" }}
-          >
-            Services
-          </button>
-          <button
-            onClick={() => handleNavAnchor("how-it-works")}
-            style={{ textAlign: "left", background: "none", border: "none", padding: "8px 0", color: "#4B5563", fontSize: "15px" }}
-          >
-            How It Works
-          </button>
-          <Link
-            to="/assessment"
-            onClick={() => setMobileOpen(false)}
-            style={{ padding: "8px 0", color: "#0EA5A0", fontWeight: 600, textDecoration: "none" }}
-          >
-            Start Assessment
-          </Link>
-          <Link
-            to="/judge"
-            onClick={() => setMobileOpen(false)}
-            style={{ padding: "8px 0", color: "#1A2B3C", fontWeight: 600, textDecoration: "none" }}
-          >
-            ⚖️ Judge Analytics Dashboard
-          </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <Link
+                to="/"
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "16px",
+                  color: "#141413",
+                  fontWeight: 600,
+                  fontSize: "17px",
+                  textDecoration: "none",
+                  backgroundColor: isLanding ? "rgba(20,20,19,0.05)" : "transparent",
+                }}
+              >
+                Overview
+              </Link>
+              <button
+                onClick={() => handleNavAnchor("services")}
+                style={{
+                  textAlign: "left",
+                  background: "none",
+                  border: "none",
+                  padding: "10px 14px",
+                  color: "#141413",
+                  fontSize: "17px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Services
+              </button>
+              <button
+                onClick={() => handleNavAnchor("how-it-works")}
+                style={{
+                  textAlign: "left",
+                  background: "none",
+                  border: "none",
+                  padding: "10px 14px",
+                  color: "#141413",
+                  fontSize: "17px",
+                  fontWeight: 450,
+                  cursor: "pointer",
+                }}
+              >
+                How It Works
+              </button>
+              <Link
+                to="/assessment"
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "16px",
+                  color: "#141413",
+                  fontWeight: isAssessment ? 600 : 450,
+                  fontSize: "17px",
+                  textDecoration: "none",
+                  backgroundColor: isAssessment ? "rgba(20,20,19,0.05)" : "transparent",
+                }}
+              >
+                Start Assessment
+              </Link>
+              <Link
+                to="/judge"
+                onClick={() => setMobileOpen(false)}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "16px",
+                  color: "#141413",
+                  fontWeight: isJudge ? 600 : 450,
+                  fontSize: "17px",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  backgroundColor: isJudge ? "rgba(20,20,19,0.05)" : "transparent",
+                }}
+              >
+                <Scale size={18} />
+                Judge Analytics
+              </Link>
+            </div>
+
+            <div style={{ paddingTop: "12px", borderTop: "1px solid rgba(20, 20, 19, 0.08)" }}>
+              <Link
+                to="/assessment"
+                onClick={() => setMobileOpen(false)}
+                className="btn-primary"
+                style={{ width: "100%", textAlign: "center" }}
+              >
+                Launch Credit Assessment <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

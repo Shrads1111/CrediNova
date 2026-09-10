@@ -1,5 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Zap,
+  Check,
+  AlertCircle,
+  TrendingUp,
+  Scale,
+  TrendingDown,
+  Droplets,
+  Wifi,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft,
+  RotateCcw,
+  Save,
+  User,
+  DollarSign,
+  Layers,
+  ShieldCheck,
+  Cpu,
+} from "lucide-react";
 import { Navbar } from "../components/common/Navbar";
 import { useAssessment } from "../context/AssessmentContext";
 import {
@@ -9,12 +29,28 @@ import {
   PaymentData,
 } from "../types/assessment";
 
+const THEME = {
+  canvas: "#F3F0EE",
+  lifted: "#FCFBFA",
+  white: "#FFFFFF",
+  softBone: "#F4F4F4",
+  ink: "#141413",
+  charcoal: "#262627",
+  signalOrange: "#CF4500",
+  lightSignalOrange: "#F37338",
+  clayBrown: "#9A3A0A",
+  slateGray: "#696969",
+  dustTaupe: "#D1CDC7",
+  borderLight: "#E2DED9",
+  borderSubtle: "rgba(20, 20, 19, 0.08)",
+};
+
 const STEPS = [
   "Personal Information",
   "Financial Information",
   "Transaction Behavior",
-  "Payment History",
-  "Review",
+  "Alternative Signals",
+  "Review & Submit",
 ];
 
 const OCCUPATIONS = [
@@ -47,59 +83,80 @@ const REPAYMENT_OPTIONS = [
   "Default – Loan default recorded",
 ];
 
-function fmtCurrency(v: string) {
-  const n = parseFloat(v.replace(/,/g, ""));
-  if (isNaN(n)) return "";
-  return n.toLocaleString("en-IN");
-}
-
-// ─── Header & Stepper ────────────────────────────────────────────────────────
+// ─── Header & Actions ────────────────────────────────────────────────────────
 function PageHeader() {
   const { loadDemoApplicant, resetAssessment, saveDraft } = useAssessment();
 
   return (
-    <div style={{ background: "white", borderBottom: "1px solid #E5E7EB", padding: "24px 0" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div
+      style={{
+        backgroundColor: THEME.lifted,
+        borderBottom: `1px solid ${THEME.borderLight}`,
+        padding: "28px 0",
+      }}
+    >
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="badge badge-teal" style={{ fontSize: 11 }}>
-                LOAN OFFICER PORTAL
-              </span>
-              <span style={{ fontSize: 12, color: "#9CA3AF" }}>·</span>
-              <span style={{ fontSize: 12, color: "#9CA3AF" }}>AI-Assisted Assessment</span>
+            <div className="eyebrow" style={{ marginBottom: "8px" }}>
+              <span className="eyebrow-dot" />
+              <span>LOAN OFFICER ASSESSMENT WORKFLOW</span>
             </div>
-            <h1 style={{ fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 800, color: "#1A2B3C", letterSpacing: "-0.02em" }}>
-              Customer Credit Assessment
+            <h1
+              style={{
+                fontSize: "clamp(26px, 3.5vw, 36px)",
+                fontWeight: 500,
+                color: THEME.ink,
+                letterSpacing: "-0.02em",
+                margin: 0,
+              }}
+            >
+              Applicant Credit Intelligence Evaluation
             </h1>
-            <p style={{ fontSize: 14, color: "#4B5563", marginTop: 4 }}>
-              Enter borrower data and alternative digital signals to calculate real-time credit score, DTI, and default risk.
+            <p
+              style={{
+                fontSize: "15px",
+                color: THEME.charcoal,
+                marginTop: "6px",
+                fontWeight: 450,
+              }}
+            >
+              Enter borrower profile and alternative digital indicators for instant AI-calibrated
+              credit scoring and risk categorization.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={loadDemoApplicant}
               className="btn-secondary"
-              style={{ fontSize: "13px", padding: "8px 16px" }}
-              title="Pre-fill form with Rahul Sharma's verified profile for instant testing"
+              style={{ fontSize: "14px", padding: "8px 20px" }}
+              title="Pre-fill form with Rahul Sharma's verified profile"
             >
-              <span>⚡</span> Pre-fill Demo Applicant
+              <Zap size={15} color={THEME.lightSignalOrange} />
+              <span>Pre-fill Demo Applicant</span>
             </button>
             <button
               onClick={saveDraft}
               className="btn-ghost"
-              style={{ fontSize: "13px", padding: "8px 14px" }}
+              style={{ fontSize: "14px", padding: "8px 18px" }}
             >
-              Save Draft
+              <Save size={15} />
+              <span>Save Draft</span>
             </button>
             <button
               onClick={resetAssessment}
               className="btn-ghost"
-              style={{ fontSize: "13px", padding: "8px 14px", color: "#EF4444" }}
+              style={{
+                fontSize: "14px",
+                padding: "8px 18px",
+                borderColor: "rgba(207, 69, 0, 0.3)",
+                color: THEME.signalOrange,
+              }}
               title="Reset all form fields"
             >
-              Reset
+              <RotateCcw size={15} />
+              <span>Reset</span>
             </button>
           </div>
         </div>
@@ -108,55 +165,88 @@ function PageHeader() {
   );
 }
 
-function ProgressBar({ currentStep, onSelectStep }: { currentStep: number; onSelectStep: (step: number) => void }) {
+// ─── Step Progress Indicator ──────────────────────────────────────────────────
+function ProgressBar({
+  currentStep,
+  onSelectStep,
+}: {
+  currentStep: number;
+  onSelectStep: (step: number) => void;
+}) {
   return (
-    <div style={{ background: "white", borderBottom: "1px solid #E5E7EB", padding: "16px 0" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
-        <div className="flex items-center justify-between overflow-x-auto pb-2">
+    <div
+      style={{
+        backgroundColor: THEME.canvas,
+        borderBottom: `1px solid ${THEME.borderLight}`,
+        padding: "16px 0",
+      }}
+    >
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        <div className="flex items-center justify-between overflow-x-auto pb-2 scrollbar-hide">
           {STEPS.map((step, i) => {
             const isDone = i < currentStep;
             const isCurr = i === currentStep;
 
             return (
-              <div key={step} className="flex items-center flex-1 min-w-[170px]">
+              <div key={step} className="flex items-center flex-1 min-w-[190px]">
                 <button
                   onClick={() => onSelectStep(i)}
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 10,
-                    background: "none",
-                    border: "none",
+                    gap: "10px",
+                    background: isCurr ? THEME.white : "transparent",
+                    border: isCurr ? `1px solid ${THEME.borderLight}` : "1px solid transparent",
+                    boxShadow: isCurr ? "0 4px 12px rgba(0,0,0,0.04)" : "none",
                     cursor: "pointer",
-                    padding: "4px 8px",
-                    borderRadius: 8,
+                    padding: "8px 14px",
+                    borderRadius: "999px",
                     textAlign: "left",
+                    transition: "all 0.2s ease",
                   }}
-                  className="hover:bg-slate-50 transition-colors"
                 >
                   <div
                     style={{
-                      width: 32,
-                      height: 32,
+                      width: "32px",
+                      height: "32px",
                       borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 13,
+                      fontSize: "13px",
                       fontWeight: 700,
-                      background: isDone ? "#22C55E" : isCurr ? "#0EA5A0" : "#F3F4F6",
-                      color: isDone || isCurr ? "white" : "#6B7280",
-                      border: isCurr ? "2px solid #0EA5A0" : "1px solid transparent",
+                      backgroundColor: isDone
+                        ? THEME.ink
+                        : isCurr
+                        ? THEME.ink
+                        : THEME.white,
+                      color: isDone || isCurr ? THEME.canvas : THEME.slateGray,
+                      border: isDone || isCurr ? `1.5px solid ${THEME.ink}` : `1px solid ${THEME.borderLight}`,
                       flexShrink: 0,
                     }}
                   >
-                    {isDone ? "✓" : i + 1}
+                    {isDone ? <Check size={16} strokeWidth={2.5} color="#FFFFFF" /> : i + 1}
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: isCurr ? "#0EA5A0" : "#9CA3AF", letterSpacing: "0.05em" }}>
-                      Step {i + 1}
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        color: isCurr ? THEME.signalOrange : THEME.slateGray,
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Step 0{i + 1}
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: isCurr ? 700 : 500, color: isCurr ? "#1A2B3C" : "#4B5563", whiteSpace: "nowrap" }}>
+                    <div
+                      style={{
+                        fontSize: "13.5px",
+                        fontWeight: isCurr ? 600 : 450,
+                        color: THEME.ink,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {step}
                     </div>
                   </div>
@@ -165,10 +255,10 @@ function ProgressBar({ currentStep, onSelectStep }: { currentStep: number; onSel
                   <div
                     style={{
                       flex: 1,
-                      height: 2,
-                      background: i < currentStep ? "#22C55E" : "#E5E7EB",
-                      margin: "0 12px",
-                      minWidth: 20,
+                      height: "1.5px",
+                      backgroundColor: i < currentStep ? THEME.ink : THEME.borderLight,
+                      margin: "0 10px",
+                      minWidth: "16px",
                     }}
                   />
                 )}
@@ -196,34 +286,94 @@ function FormField({
   hint?: string;
 }) {
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-        <label style={{ fontSize: 13, fontWeight: 600, color: "#1A2B3C" }}>
-          {label} {required && <span style={{ color: "#EF4444" }}>*</span>}
+    <div style={{ marginBottom: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          marginBottom: "8px",
+        }}
+      >
+        <label style={{ fontSize: "14px", fontWeight: 600, color: THEME.ink }}>
+          {label} {required && <span style={{ color: THEME.signalOrange }}>*</span>}
         </label>
-        {hint && <span style={{ fontSize: 11, color: "#9CA3AF" }}>{hint}</span>}
+        {hint && <span style={{ fontSize: "12px", color: THEME.slateGray }}>{hint}</span>}
       </div>
       {children}
       {error && (
-        <p style={{ fontSize: 12, color: "#EF4444", marginTop: 4, display: "flex", alignItems: "center", gap: 4 }}>
-          <span>⚠</span> {error}
+        <p
+          style={{
+            fontSize: "12.5px",
+            color: THEME.signalOrange,
+            marginTop: "6px",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            fontWeight: 500,
+          }}
+        >
+          <AlertCircle size={14} />
+          <span>{error}</span>
         </p>
       )}
     </div>
   );
 }
 
-function SectionCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function SectionCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="card mb-6">
-      <div style={{ marginBottom: 20 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1A2B3C", marginBottom: 4 }}>{title}</h3>
-        {subtitle && <p style={{ fontSize: 13, color: "#6B7280" }}>{subtitle}</p>}
+    <div
+      className="card-lifted mb-8"
+      style={{
+        padding: "36px",
+        backgroundColor: THEME.lifted,
+        borderRadius: "32px",
+        border: `1px solid ${THEME.borderLight}`,
+        boxShadow: "0 12px 36px rgba(0,0,0,0.04)",
+      }}
+    >
+      <div style={{ marginBottom: "28px" }}>
+        <h3
+          style={{
+            fontSize: "22px",
+            fontWeight: 500,
+            color: THEME.ink,
+            marginBottom: "6px",
+          }}
+        >
+          {title}
+        </h3>
+        {subtitle && (
+          <p style={{ fontSize: "14.5px", color: THEME.slateGray, margin: 0 }}>
+            {subtitle}
+          </p>
+        )}
       </div>
       {children}
     </div>
   );
 }
+
+const inputStyle = {
+  width: "100%",
+  padding: "11px 18px",
+  borderRadius: "16px",
+  border: `1.5px solid ${THEME.borderLight}`,
+  fontSize: "14.5px",
+  color: THEME.ink,
+  backgroundColor: THEME.white,
+  transition: "all 0.2s ease",
+  outline: "none",
+};
 
 // ─── Step 1: Personal ────────────────────────────────────────────────────────
 function StepPersonal() {
@@ -236,17 +386,17 @@ function StepPersonal() {
   return (
     <div className="animate-fade-in">
       <SectionCard
-        title="Personal & Demographic Details"
-        subtitle="Basic borrower profile information used for identity verification and classification."
+        title="Personal & Demographic Profile"
+        subtitle="Core borrower identity and classification inputs required for baseline verification."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
           <FormField label="Full Name" required error={errors.fullName}>
             <input
               type="text"
               value={personal.fullName}
               onChange={(e) => update("fullName", e.target.value)}
               placeholder="e.g. Rahul Sharma"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             />
           </FormField>
 
@@ -258,18 +408,20 @@ function StepPersonal() {
               placeholder="e.g. 34"
               min={18}
               max={99}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             />
           </FormField>
 
-          <FormField label="Occupation" required>
+          <FormField label="Primary Occupation" required>
             <select
               value={personal.occupation}
               onChange={(e) => update("occupation", e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             >
               {OCCUPATIONS.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
           </FormField>
@@ -278,10 +430,12 @@ function StepPersonal() {
             <select
               value={personal.businessType}
               onChange={(e) => update("businessType", e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             >
               {BUSINESS_TYPES.map((b) => (
-                <option key={b} value={b}>{b}</option>
+                <option key={b} value={b}>
+                  {b}
+                </option>
               ))}
             </select>
           </FormField>
@@ -292,7 +446,7 @@ function StepPersonal() {
               value={personal.location}
               onChange={(e) => update("location", e.target.value)}
               placeholder="e.g. Mumbai, Maharashtra"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             />
           </FormField>
 
@@ -302,7 +456,7 @@ function StepPersonal() {
               value={personal.phone}
               onChange={(e) => update("phone", e.target.value)}
               placeholder="e.g. +91 98765 43210"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             />
           </FormField>
 
@@ -312,17 +466,17 @@ function StepPersonal() {
               value={personal.email}
               onChange={(e) => update("email", e.target.value)}
               placeholder="e.g. rahul.sharma@example.com"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             />
           </FormField>
 
-          <FormField label="Customer / Applicant ID" hint="Auto-generated or Core Banking ID">
+          <FormField label="Core Banking / Applicant ID" hint="Auto-generated ID">
             <input
               type="text"
               value={personal.customerId}
               onChange={(e) => update("customerId", e.target.value)}
               placeholder="CRD-102938"
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             />
           </FormField>
         </div>
@@ -336,7 +490,6 @@ function StepFinancial() {
   const { financial, setFinancial, errors, dti } = useAssessment();
 
   const update = (field: keyof FinancialData, val: string) => {
-    // Keep numbers and commas
     const cleaned = val.replace(/[^0-9]/g, "");
     const formatted = cleaned ? parseInt(cleaned, 10).toLocaleString("en-IN") : "";
     setFinancial((prev) => ({ ...prev, [field]: formatted }));
@@ -351,108 +504,254 @@ function StepFinancial() {
     <div className="animate-fade-in">
       <SectionCard
         title="Financial Information & Debt Obligations"
-        subtitle="Provide monthly earnings, commitments, and savings for debt service capacity calculation."
+        subtitle="Monthly income capacity, existing obligations, and calculated debt service coverage."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-          <FormField label="Monthly Gross Income (₹)" required error={errors.monthlyIncome}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+          <FormField label="Monthly Gross Income (INR)" required error={errors.monthlyIncome}>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-gray-400 font-semibold">₹</span>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "12px",
+                  color: THEME.slateGray,
+                  fontWeight: 600,
+                }}
+              >
+                ₹
+              </span>
               <input
                 type="text"
                 value={financial.monthlyIncome}
                 onChange={(e) => update("monthlyIncome", e.target.value)}
                 placeholder="1,25,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+                style={{ ...inputStyle, paddingLeft: "36px" }}
               />
             </div>
           </FormField>
 
-          <FormField label="Monthly Living Expenses (₹)" required error={errors.monthlyExpenses}>
+          <FormField label="Monthly Living Expenses (INR)" required error={errors.monthlyExpenses}>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-gray-400 font-semibold">₹</span>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "12px",
+                  color: THEME.slateGray,
+                  fontWeight: 600,
+                }}
+              >
+                ₹
+              </span>
               <input
                 type="text"
                 value={financial.monthlyExpenses}
                 onChange={(e) => update("monthlyExpenses", e.target.value)}
                 placeholder="45,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+                style={{ ...inputStyle, paddingLeft: "36px" }}
               />
             </div>
           </FormField>
 
-          <FormField label="Total Active Loan Principal (₹)" hint="Existing outstanding credit lines">
+          <FormField label="Total Active Loan Principal (INR)" hint="Existing debt lines">
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-gray-400 font-semibold">₹</span>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "12px",
+                  color: THEME.slateGray,
+                  fontWeight: 600,
+                }}
+              >
+                ₹
+              </span>
               <input
                 type="text"
                 value={financial.existingLoans}
                 onChange={(e) => update("existingLoans", e.target.value)}
                 placeholder="3,50,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+                style={{ ...inputStyle, paddingLeft: "36px" }}
               />
             </div>
           </FormField>
 
-          <FormField label="Current Monthly EMI Outflow (₹)">
+          <FormField label="Current Monthly EMI Commitments (INR)">
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-gray-400 font-semibold">₹</span>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "12px",
+                  color: THEME.slateGray,
+                  fontWeight: 600,
+                }}
+              >
+                ₹
+              </span>
               <input
                 type="text"
                 value={financial.emiAmount}
                 onChange={(e) => update("emiAmount", e.target.value)}
                 placeholder="28,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+                style={{ ...inputStyle, paddingLeft: "36px" }}
               />
             </div>
           </FormField>
 
-          <FormField label="Total Liquid Savings & Deposits (₹)" required error={errors.savings}>
+          <FormField label="Total Liquid Savings & Deposits (INR)" required error={errors.savings}>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-gray-400 font-semibold">₹</span>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "12px",
+                  color: THEME.slateGray,
+                  fontWeight: 600,
+                }}
+              >
+                ₹
+              </span>
               <input
                 type="text"
                 value={financial.savings}
                 onChange={(e) => update("savings", e.target.value)}
                 placeholder="4,20,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+                style={{ ...inputStyle, paddingLeft: "36px" }}
               />
             </div>
           </FormField>
         </div>
 
-        {/* Dynamic calculation callouts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-[#E5E7EB]">
-          <div className="p-4 rounded-xl bg-[#F0FAFA] border border-[#0EA5A0]/20 flex items-center justify-between">
+        {/* Dynamic Calculation Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-[#E2DED9]">
+          <div
+            style={{
+              padding: "20px 24px",
+              borderRadius: "20px",
+              backgroundColor: THEME.white,
+              border: `1px solid ${THEME.borderLight}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <div>
-              <p className="text-xs font-bold text-[#0EA5A0] uppercase tracking-wider">Calculated Debt-to-Income (DTI)</p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-extrabold text-[#1A2B3C]">
+              <p
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  color: THEME.slateGray,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                CALCULATED DEBT-TO-INCOME (DTI)
+              </p>
+              <div className="flex items-baseline gap-3 mt-1">
+                <span
+                  style={{
+                    fontFamily: "'Sofia Sans', sans-serif",
+                    fontSize: "28px",
+                    fontWeight: 700,
+                    color: THEME.ink,
+                  }}
+                >
                   {dti !== null ? `${dti}%` : "—"}
                 </span>
                 <span
-                  className="text-xs font-bold px-2 py-0.5 rounded-full"
                   style={{
-                    background: (dti || 0) < 35 ? "#DCFCE7" : (dti || 0) <= 45 ? "#FEF3C7" : "#FEE2E2",
-                    color: (dti || 0) < 35 ? "#16A34A" : (dti || 0) <= 45 ? "#D97706" : "#DC2626",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    backgroundColor:
+                      (dti || 0) < 35
+                        ? "rgba(34, 197, 94, 0.12)"
+                        : (dti || 0) <= 45
+                        ? "rgba(243, 115, 56, 0.12)"
+                        : "rgba(207, 69, 0, 0.12)",
+                    color:
+                      (dti || 0) < 35
+                        ? "#16A34A"
+                        : (dti || 0) <= 45
+                        ? THEME.lightSignalOrange
+                        : THEME.signalOrange,
                   }}
                 >
-                  {(dti || 0) < 35 ? "Optimal (<35%)" : (dti || 0) <= 45 ? "Moderate (35–45%)" : "High Risk (>45%)"}
+                  {(dti || 0) < 35
+                    ? "Optimal (<35%)"
+                    : (dti || 0) <= 45
+                    ? "Moderate (35–45%)"
+                    : "High Risk (>45%)"}
                 </span>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-[#0EA5A0]/10 flex items-center justify-center text-[#0EA5A0] font-bold">
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                backgroundColor: THEME.canvas,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                color: THEME.ink,
+              }}
+            >
               %
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div
+            style={{
+              padding: "20px 24px",
+              borderRadius: "20px",
+              backgroundColor: THEME.white,
+              border: `1px solid ${THEME.borderLight}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Estimated Monthly Disposable</p>
-              <p className="text-2xl font-extrabold text-[#1A2B3C] mt-1">
+              <p
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  color: THEME.slateGray,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                NET DISPOSABLE SURPLUS / MO
+              </p>
+              <p
+                style={{
+                  fontFamily: "'Sofia Sans', sans-serif",
+                  fontSize: "28px",
+                  fontWeight: 700,
+                  color: THEME.ink,
+                  marginTop: "4px",
+                }}
+              >
                 ₹{netDisposable.toLocaleString("en-IN")}
               </p>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "50%",
+                backgroundColor: THEME.canvas,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                color: THEME.ink,
+              }}
+            >
               ₹
             </div>
           </div>
@@ -479,28 +778,42 @@ function StepTransactions() {
   return (
     <div className="animate-fade-in">
       <SectionCard
-        title="Transaction Behavior & Cash Flow Analytics"
-        subtitle="Evaluate liquidity velocity, operational stability, and banking friction flags."
+        title="Transaction Behavior & Cash Flow Velocity"
+        subtitle="Banking friction indicators, payment frequency, and balance growth trajectory."
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-          <FormField label="Average Monthly Transaction Volume (₹)" required error={errors.monthlyVolume}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+          <FormField
+            label="Average Monthly Transaction Volume (INR)"
+            required
+            error={errors.monthlyVolume}
+          >
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-gray-400 font-semibold">₹</span>
+              <span
+                style={{
+                  position: "absolute",
+                  left: "16px",
+                  top: "12px",
+                  color: THEME.slateGray,
+                  fontWeight: 600,
+                }}
+              >
+                ₹
+              </span>
               <input
                 type="text"
                 value={transaction.monthlyVolume}
                 onChange={(e) => handleVolume(e.target.value)}
                 placeholder="3,40,000"
-                className="w-full pl-8 pr-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+                style={{ ...inputStyle, paddingLeft: "36px" }}
               />
             </div>
           </FormField>
 
-          <FormField label="Transaction Frequency" required error={errors.frequency}>
+          <FormField label="Monthly Transaction Frequency" required error={errors.frequency}>
             <select
               value={transaction.frequency}
               onChange={(e) => update("frequency", e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             >
               <option value="Daily (20+ per month)">Daily (20+ transactions / month)</option>
               <option value="Weekly (4–10 per month)">Weekly (4–10 transactions / month)</option>
@@ -511,7 +824,11 @@ function StepTransactions() {
 
           <FormField label="Quarterly Average Balance Trend" required error={errors.balanceTrend}>
             <div className="grid grid-cols-3 gap-3">
-              {["Growing", "Stable", "Declining"].map((trend) => {
+              {[
+                { trend: "Growing", icon: TrendingUp },
+                { trend: "Stable", icon: Scale },
+                { trend: "Declining", icon: TrendingDown },
+              ].map(({ trend, icon: IconComponent }) => {
                 const isSelected = transaction.balanceTrend === trend;
                 return (
                   <button
@@ -519,21 +836,25 @@ function StepTransactions() {
                     type="button"
                     onClick={() => update("balanceTrend", trend)}
                     style={{
-                      padding: "10px",
-                      borderRadius: 8,
-                      border: `1.5px solid ${isSelected ? "#0EA5A0" : "#E5E7EB"}`,
-                      background: isSelected ? "#F0FAFA" : "white",
-                      color: isSelected ? "#0EA5A0" : "#4B5563",
-                      fontWeight: isSelected ? 700 : 500,
-                      fontSize: 13,
+                      padding: "14px 8px",
+                      borderRadius: "16px",
+                      border: `1.5px solid ${isSelected ? THEME.ink : THEME.borderLight}`,
+                      backgroundColor: isSelected ? THEME.ink : THEME.white,
+                      color: isSelected ? THEME.canvas : THEME.charcoal,
+                      fontWeight: isSelected ? 600 : 450,
+                      fontSize: "13.5px",
                       cursor: "pointer",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      gap: 4,
+                      gap: "6px",
+                      transition: "all 0.2s ease",
                     }}
                   >
-                    <span>{trend === "Growing" ? "📈" : trend === "Stable" ? "⚖️" : "📉"}</span>
+                    <IconComponent
+                      size={18}
+                      color={isSelected ? THEME.lightSignalOrange : THEME.slateGray}
+                    />
                     <span>{trend}</span>
                   </button>
                 );
@@ -541,11 +862,11 @@ function StepTransactions() {
             </div>
           </FormField>
 
-          <FormField label="Bounced Cheques / Failed Auto-Debits (Past 12M)">
+          <FormField label="Bounced Cheques / Auto-Debits (Past 12M)">
             <select
               value={transaction.bouncedPayments}
               onChange={(e) => update("bouncedPayments", e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+              style={inputStyle}
             >
               <option value="0">0 (Zero bounced debits)</option>
               <option value="1">1 incident</option>
@@ -559,7 +880,7 @@ function StepTransactions() {
   );
 }
 
-// ─── Step 4: Payments ────────────────────────────────────────────────────────
+// ─── Step 4: Alternative Signals ─────────────────────────────────────────────
 function StepPayments() {
   const { payment, setPayment } = useAssessment();
 
@@ -570,70 +891,97 @@ function StepPayments() {
   return (
     <div className="animate-fade-in">
       <SectionCard
-        title="Alternative Payment Records & Digital Behavior"
-        subtitle="Verify off-bureau data points: utility payment discipline, UPI transaction footprints, and credit history."
+        title="Alternative Payment Records & Digital Footprint"
+        subtitle="Verify off-bureau data points: utility payment discipline, UPI regularity, and historical credit file."
       >
-        {/* Utility checkboxes */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "#1A2B3C", display: "block", marginBottom: 12 }}>
-            Utility Services Verified (Timely Payment History 12M+)
+        {/* Utility Checkboxes with Lucide icons */}
+        <div style={{ marginBottom: "28px" }}>
+          <label
+            style={{
+              fontSize: "14px",
+              fontWeight: 600,
+              color: THEME.ink,
+              display: "block",
+              marginBottom: "12px",
+            }}
+          >
+            Verified Utility Accounts (Timely On-Time History 12M+)
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { id: "electricity", label: "Electricity Bill", icon: "⚡", checked: payment.electricity },
-              { id: "water", label: "Municipal Water", icon: "💧", checked: payment.water },
-              { id: "mobileInternet", label: "Broadband / Mobile", icon: "📶", checked: payment.mobileInternet },
-            ].map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => toggle(u.id as any)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px 16px",
-                  borderRadius: 8,
-                  border: `1.5px solid ${u.checked ? "#22C55E" : "#E5E7EB"}`,
-                  background: u.checked ? "#F0FDF4" : "white",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span style={{ fontSize: 18 }}>{u.icon}</span>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: u.checked ? "#16A34A" : "#4B5563" }}>
-                    {u.label}
-                  </span>
-                </div>
-                <span
+              { id: "electricity", label: "Electricity Bill", icon: Zap, checked: payment.electricity },
+              { id: "water", label: "Municipal Water", icon: Droplets, checked: payment.water },
+              { id: "mobileInternet", label: "Broadband / Telecom", icon: Wifi, checked: payment.mobileInternet },
+            ].map((u) => {
+              const IconComp = u.icon;
+              return (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() => toggle(u.id as any)}
                   style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 4,
-                    background: u.checked ? "#22C55E" : "#E5E7EB",
-                    color: "white",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 12,
-                    fontWeight: 700,
+                    justifyContent: "space-between",
+                    padding: "16px 18px",
+                    borderRadius: "18px",
+                    border: `1.5px solid ${u.checked ? THEME.ink : THEME.borderLight}`,
+                    backgroundColor: u.checked ? THEME.white : THEME.canvas,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  {u.checked ? "✓" : ""}
-                </span>
-              </button>
-            ))}
+                  <div className="flex items-center gap-3">
+                    <IconComp
+                      size={20}
+                      color={u.checked ? THEME.signalOrange : THEME.slateGray}
+                    />
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: u.checked ? 600 : 450,
+                        color: THEME.ink,
+                      }}
+                    >
+                      {u.label}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      width: "22px",
+                      height: "22px",
+                      borderRadius: "50%",
+                      backgroundColor: u.checked ? THEME.ink : THEME.white,
+                      border: `1px solid ${THEME.borderLight}`,
+                      color: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {u.checked && <Check size={13} strokeWidth={3} />}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* UPI slider */}
-        <div style={{ marginBottom: 24 }}>
+        {/* UPI Activity Intensity Slider */}
+        <div style={{ marginBottom: "28px" }}>
           <div className="flex justify-between items-center mb-2">
-            <label style={{ fontSize: 13, fontWeight: 600, color: "#1A2B3C" }}>
+            <label style={{ fontSize: "14px", fontWeight: 600, color: THEME.ink }}>
               Digital & UPI Activity Intensity (Index 0 – 100)
             </label>
-            <span className="badge badge-teal font-mono font-bold">
+            <span
+              style={{
+                fontFamily: "'Sofia Sans', sans-serif",
+                fontSize: "16px",
+                fontWeight: 700,
+                color: THEME.ink,
+              }}
+            >
               {payment.upiActivity} / 100
             </span>
           </div>
@@ -642,25 +990,31 @@ function StepPayments() {
             min="0"
             max="100"
             value={payment.upiActivity}
-            onChange={(e) => setPayment((prev) => ({ ...prev, upiActivity: parseInt(e.target.value, 10) }))}
-            className="w-full"
+            onChange={(e) =>
+              setPayment((prev) => ({ ...prev, upiActivity: parseInt(e.target.value, 10) }))
+            }
+            style={{ width: "100%" }}
           />
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <div className="flex justify-between text-xs text-gray-500 mt-2">
             <span>Low (Cash dominant)</span>
             <span>Moderate (Mixed channels)</span>
             <span>High (Extensive digital footprint)</span>
           </div>
         </div>
 
-        {/* Repayment History */}
+        {/* Repayment History Dropdown */}
         <FormField label="Historical Loan / Facility Repayment Record">
           <select
             value={payment.repaymentHistory}
-            onChange={(e) => setPayment((prev) => ({ ...prev, repaymentHistory: e.target.value }))}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] text-sm text-[#1A2B3C] bg-white transition-all"
+            onChange={(e) =>
+              setPayment((prev) => ({ ...prev, repaymentHistory: e.target.value }))
+            }
+            style={inputStyle}
           >
             {REPAYMENT_OPTIONS.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
         </FormField>
@@ -673,35 +1027,90 @@ function StepPayments() {
 function StepReview({ onEdit }: { onEdit: (step: number) => void }) {
   const { personal, financial, transaction, payment, dti } = useAssessment();
 
-  const Row = ({ label, value }: { label: string; value: string | React.ReactNode }) => (
-    <div className="flex justify-between items-center py-2 border-b border-[#F3F4F6] text-sm">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-semibold text-[#1A2B3C] text-right">{value || "—"}</span>
+  const Row = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value: string | React.ReactNode;
+  }) => (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 0",
+        borderBottom: `1px solid ${THEME.borderLight}`,
+        fontSize: "14px",
+      }}
+    >
+      <span style={{ color: THEME.slateGray }}>{label}</span>
+      <span style={{ fontWeight: 600, color: THEME.ink, textAlign: "right" }}>
+        {value || "—"}
+      </span>
     </div>
   );
 
   return (
     <div className="animate-fade-in space-y-6">
-      {/* Overview Banner */}
-      <div className="p-4 rounded-xl bg-gradient-to-r from-[#0EA5A0]/10 via-[#14B8A6]/10 to-[#22C55E]/10 border border-[#0EA5A0]/30 flex items-center justify-between">
+      <div
+        style={{
+          padding: "24px 30px",
+          borderRadius: "24px",
+          backgroundColor: THEME.white,
+          border: `1.5px solid ${THEME.ink}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+        }}
+      >
         <div>
-          <span className="badge badge-teal font-bold text-xs uppercase mb-1">
-            Ready For AI Scoring
-          </span>
-          <h3 className="text-lg font-bold text-[#1A2B3C]">
-            Review Applicant Assessment Details
+          <div className="eyebrow" style={{ marginBottom: "6px" }}>
+            <span className="eyebrow-dot" />
+            <span>READY FOR AI SCORING ENGINE</span>
+          </div>
+          <h3
+            style={{
+              fontSize: "20px",
+              fontWeight: 500,
+              color: THEME.ink,
+              margin: 0,
+            }}
+          >
+            Review Applicant Assessment Dossier
           </h3>
-          <p className="text-xs text-gray-600">
-            Please verify all entered financial figures and alternative indicators prior to generating the AI score.
+          <p style={{ fontSize: "14px", color: THEME.slateGray, margin: "4px 0 0" }}>
+            Verify entered financial figures, liquidity telemetry, and alternative indicators before
+            launching the scoring model.
           </p>
         </div>
       </div>
 
-      {/* Section 1 */}
-      <div className="card">
+      {/* Personal Dossier */}
+      <div
+        style={{
+          backgroundColor: THEME.lifted,
+          borderRadius: "24px",
+          padding: "28px",
+          border: `1px solid ${THEME.borderLight}`,
+        }}
+      >
         <div className="flex justify-between items-center mb-4">
-          <h4 className="font-bold text-[#1A2B3C] text-base">1. Personal Details</h4>
-          <button onClick={() => onEdit(0)} className="text-xs font-bold text-[#0EA5A0] hover:underline">
+          <h4 style={{ fontSize: "17px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+            1. Personal Details
+          </h4>
+          <button
+            onClick={() => onEdit(0)}
+            style={{
+              fontSize: "13px",
+              fontWeight: 600,
+              color: THEME.signalOrange,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
             Edit Step
           </button>
         </div>
@@ -721,27 +1130,54 @@ function StepReview({ onEdit }: { onEdit: (step: number) => void }) {
         </div>
       </div>
 
-      {/* Section 2 */}
-      <div className="card">
+      {/* Financial Position */}
+      <div
+        style={{
+          backgroundColor: THEME.lifted,
+          borderRadius: "24px",
+          padding: "28px",
+          border: `1px solid ${THEME.borderLight}`,
+        }}
+      >
         <div className="flex justify-between items-center mb-4">
-          <h4 className="font-bold text-[#1A2B3C] text-base">2. Financial Position</h4>
-          <button onClick={() => onEdit(1)} className="text-xs font-bold text-[#0EA5A0] hover:underline">
+          <h4 style={{ fontSize: "17px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+            2. Financial Position & Obligations
+          </h4>
+          <button
+            onClick={() => onEdit(1)}
+            style={{
+              fontSize: "13px",
+              fontWeight: 600,
+              color: THEME.signalOrange,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
             Edit Step
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
           <div>
             <Row label="Monthly Gross Income" value={`₹${financial.monthlyIncome}`} />
-            <Row label="Monthly Expenses" value={`₹${financial.monthlyExpenses}`} />
+            <Row label="Monthly Living Expenses" value={`₹${financial.monthlyExpenses}`} />
             <Row label="Liquid Savings" value={`₹${financial.savings}`} />
           </div>
           <div>
             <Row label="Active Loan Balance" value={`₹${financial.existingLoans}`} />
-            <Row label="Current EMI Commitments" value={`₹${financial.emiAmount}`} />
+            <Row label="Current Monthly EMI" value={`₹${financial.emiAmount}`} />
             <Row
               label="Calculated DTI Ratio"
               value={
-                <span className={`badge ${dti && dti < 35 ? "badge-green" : "badge-amber"}`}>
+                <span
+                  style={{
+                    padding: "3px 10px",
+                    borderRadius: "999px",
+                    backgroundColor: dti && dti < 35 ? "rgba(34,197,94,0.12)" : "rgba(243,115,56,0.12)",
+                    color: dti && dti < 35 ? "#16A34A" : THEME.signalOrange,
+                    fontWeight: 700,
+                  }}
+                >
                   {dti !== null ? `${dti}%` : "—"}
                 </span>
               }
@@ -750,38 +1186,80 @@ function StepReview({ onEdit }: { onEdit: (step: number) => void }) {
         </div>
       </div>
 
-      {/* Section 3 & 4 */}
+      {/* Transaction & Alternative Signals */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="card">
+        <div
+          style={{
+            backgroundColor: THEME.lifted,
+            borderRadius: "24px",
+            padding: "28px",
+            border: `1px solid ${THEME.borderLight}`,
+          }}
+        >
           <div className="flex justify-between items-center mb-4">
-            <h4 className="font-bold text-[#1A2B3C] text-base">3. Transactions</h4>
-            <button onClick={() => onEdit(2)} className="text-xs font-bold text-[#0EA5A0] hover:underline">
+            <h4 style={{ fontSize: "17px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+              3. Transactions
+            </h4>
+            <button
+              onClick={() => onEdit(2)}
+              style={{
+                fontSize: "13px",
+                fontWeight: 600,
+                color: THEME.signalOrange,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
               Edit Step
             </button>
           </div>
           <Row label="Monthly Volume" value={`₹${transaction.monthlyVolume}`} />
           <Row label="Frequency" value={transaction.frequency} />
-          <Row label="Balance Trend" value={transaction.balanceTrend} />
+          <Row label="Balance Trajectory" value={transaction.balanceTrend} />
           <Row label="Bounced Cheques" value={transaction.bouncedPayments} />
         </div>
 
-        <div className="card">
+        <div
+          style={{
+            backgroundColor: THEME.lifted,
+            borderRadius: "24px",
+            padding: "28px",
+            border: `1px solid ${THEME.borderLight}`,
+          }}
+        >
           <div className="flex justify-between items-center mb-4">
-            <h4 className="font-bold text-[#1A2B3C] text-base">4. Alternative Signals</h4>
-            <button onClick={() => onEdit(3)} className="text-xs font-bold text-[#0EA5A0] hover:underline">
+            <h4 style={{ fontSize: "17px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+              4. Alternative Signals
+            </h4>
+            <button
+              onClick={() => onEdit(3)}
+              style={{
+                fontSize: "13px",
+                fontWeight: 600,
+                color: THEME.signalOrange,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
               Edit Step
             </button>
           </div>
           <Row
             label="Verified Utilities"
-            value={[
-              payment.electricity ? "Power" : null,
-              payment.water ? "Water" : null,
-              payment.mobileInternet ? "Telecom" : null,
-            ].filter(Boolean).join(", ") || "None"}
+            value={
+              [
+                payment.electricity ? "Power" : null,
+                payment.water ? "Water" : null,
+                payment.mobileInternet ? "Telecom" : null,
+              ]
+                .filter(Boolean)
+                .join(", ") || "None"
+            }
           />
-          <Row label="UPI Activity Score" value={`${payment.upiActivity} / 100`} />
-          <Row label="Repayment History" value={payment.repaymentHistory} />
+          <Row label="UPI Activity Index" value={`${payment.upiActivity} / 100`} />
+          <Row label="Repayment Record" value={payment.repaymentHistory} />
         </div>
       </div>
     </div>
@@ -790,90 +1268,195 @@ function StepReview({ onEdit }: { onEdit: (step: number) => void }) {
 
 // ─── Live Sidebar ────────────────────────────────────────────────────────────
 function AssessmentSidebar() {
-  const { currentStep, completion, personal, financial, transaction, payment, dti } = useAssessment();
+  const { currentStep, completion, personal, financial, transaction, payment, dti } =
+    useAssessment();
 
   const inc = parseFloat(financial.monthlyIncome.replace(/,/g, "")) || 0;
   const exp = parseFloat(financial.monthlyExpenses.replace(/,/g, "")) || 0;
   const emi = parseFloat(financial.emiAmount.replace(/,/g, "")) || 0;
   const disposable = Math.max(0, inc - exp - emi);
 
-  const utilitiesCount = [payment.electricity, payment.water, payment.mobileInternet].filter(Boolean).length;
+  const utilitiesCount = [payment.electricity, payment.water, payment.mobileInternet].filter(
+    Boolean
+  ).length;
 
   return (
-    <div className="space-y-5 sticky top-24">
-      {/* Progress summary card */}
-      <div className="card">
+    <div className="space-y-6 sticky top-28">
+      {/* Progress Summary Card */}
+      <div
+        style={{
+          backgroundColor: THEME.white,
+          borderRadius: "24px",
+          padding: "24px",
+          border: `1px solid ${THEME.borderLight}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+        }}
+      >
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#0EA5A0]">
-            Assessment Progress
-          </span>
-          <span className="text-sm font-extrabold text-[#1A2B3C] font-mono">{completion}%</span>
-        </div>
-        <div className="w-full bg-[#E5E7EB] rounded-full h-2 overflow-hidden mb-3">
-          <div
-            className="h-full rounded-full transition-all duration-500"
+          <span
             style={{
+              fontSize: "11.5px",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: THEME.slateGray,
+            }}
+          >
+            ASSESSMENT PROGRESS
+          </span>
+          <span
+            style={{
+              fontFamily: "'Sofia Sans', sans-serif",
+              fontSize: "16px",
+              fontWeight: 700,
+              color: THEME.ink,
+            }}
+          >
+            {completion}%
+          </span>
+        </div>
+        <div
+          style={{
+            width: "100%",
+            height: "6px",
+            borderRadius: "999px",
+            backgroundColor: THEME.canvas,
+            overflow: "hidden",
+            marginBottom: "12px",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
               width: `${completion}%`,
-              background: "linear-gradient(90deg, #0EA5A0, #22C55E)",
+              backgroundColor: THEME.ink,
+              transition: "width 0.4s ease",
             }}
           />
         </div>
-        <p className="text-xs text-gray-500">
-          Step {currentStep + 1} of {STEPS.length}: <strong>{STEPS[currentStep]}</strong>
+        <p style={{ fontSize: "13px", color: THEME.slateGray, margin: 0 }}>
+          Step {currentStep + 1} of {STEPS.length}:{" "}
+          <strong style={{ color: THEME.ink }}>{STEPS[currentStep]}</strong>
         </p>
       </div>
 
-      {/* Borrower Card */}
-      <div className="card">
-        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#E5E7EB]">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0EA5A0] to-[#22C55E] text-white font-bold flex items-center justify-center text-sm shadow-sm">
+      {/* Borrower Profile Card */}
+      <div
+        style={{
+          backgroundColor: THEME.white,
+          borderRadius: "24px",
+          padding: "24px",
+          border: `1px solid ${THEME.borderLight}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            paddingBottom: "16px",
+            borderBottom: `1px solid ${THEME.borderLight}`,
+            marginBottom: "16px",
+          }}
+        >
+          <div
+            style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "50%",
+              backgroundColor: THEME.ink,
+              color: THEME.canvas,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "16px",
+            }}
+          >
             {personal.fullName ? personal.fullName.charAt(0) : "A"}
           </div>
           <div>
-            <h4 className="text-sm font-bold text-[#1A2B3C] leading-tight">
+            <h4
+              style={{
+                fontSize: "15px",
+                fontWeight: 600,
+                color: THEME.ink,
+                margin: 0,
+              }}
+            >
               {personal.fullName || "Applicant Profile"}
             </h4>
-            <p className="text-xs text-gray-400 mt-0.5 font-mono">
+            <p
+              style={{
+                fontSize: "12px",
+                color: THEME.slateGray,
+                margin: "2px 0 0",
+              }}
+            >
               {personal.customerId || "CRD-PENDING"}
             </p>
           </div>
         </div>
 
-        <div className="space-y-2.5 text-xs">
+        <div className="space-y-2 text-xs">
           <div className="flex justify-between">
-            <span className="text-gray-400">Occupation</span>
-            <span className="font-semibold text-[#1A2B3C]">{personal.occupation}</span>
+            <span style={{ color: THEME.slateGray }}>Occupation</span>
+            <span style={{ fontWeight: 600, color: THEME.ink }}>{personal.occupation}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-400">Location</span>
-            <span className="font-semibold text-[#1A2B3C] truncate max-w-[150px]">{personal.location || "—"}</span>
+            <span style={{ color: THEME.slateGray }}>Location</span>
+            <span style={{ fontWeight: 600, color: THEME.ink }}>{personal.location || "—"}</span>
           </div>
         </div>
       </div>
 
       {/* Live Financial Metrics */}
-      <div className="card">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
-          Live Financial Ratio
+      <div
+        style={{
+          backgroundColor: THEME.white,
+          borderRadius: "24px",
+          padding: "24px",
+          border: `1px solid ${THEME.borderLight}`,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.04)",
+        }}
+      >
+        <h4
+          style={{
+            fontSize: "12px",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            color: THEME.slateGray,
+            marginBottom: "16px",
+          }}
+        >
+          LIVE FINANCIAL RATIOS
         </h4>
         <div className="space-y-3 text-xs">
           <div className="flex justify-between items-baseline">
-            <span className="text-gray-500">Debt-to-Income (DTI)</span>
-            <span className="text-base font-extrabold text-[#1A2B3C]">
+            <span style={{ color: THEME.slateGray }}>Debt-to-Income (DTI)</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: THEME.ink }}>
               {dti !== null ? `${dti}%` : "—"}
             </span>
           </div>
           <div className="flex justify-between items-baseline">
-            <span className="text-gray-500">Net Disposable / Mo</span>
-            <span className="font-bold text-[#1A2B3C]">₹{disposable.toLocaleString("en-IN")}</span>
+            <span style={{ color: THEME.slateGray }}>Net Disposable / Mo</span>
+            <span style={{ fontWeight: 700, color: THEME.ink }}>
+              ₹{disposable.toLocaleString("en-IN")}
+            </span>
           </div>
           <div className="flex justify-between items-baseline">
-            <span className="text-gray-500">Utilities Verified</span>
-            <span className="font-bold text-[#0EA5A0]">{utilitiesCount} of 3</span>
+            <span style={{ color: THEME.slateGray }}>Utilities Verified</span>
+            <span style={{ fontWeight: 700, color: THEME.signalOrange }}>
+              {utilitiesCount} of 3
+            </span>
           </div>
           <div className="flex justify-between items-baseline">
-            <span className="text-gray-500">Balance Trajectory</span>
-            <span className="font-semibold text-[#1A2B3C]">{transaction.balanceTrend}</span>
+            <span style={{ color: THEME.slateGray }}>Balance Trajectory</span>
+            <span style={{ fontWeight: 600, color: THEME.ink }}>
+              {transaction.balanceTrend}
+            </span>
           </div>
         </div>
       </div>
@@ -902,39 +1485,61 @@ function ActionBar({
         bottom: 0,
         left: 0,
         right: 0,
-        background: "white",
-        borderTop: "1px solid #E5E7EB",
-        boxShadow: "0 -4px 16px rgba(0,0,0,0.06)",
+        backgroundColor: THEME.white,
+        borderTop: `1px solid ${THEME.borderLight}`,
+        boxShadow: "0 -8px 24px rgba(0, 0, 0, 0.06)",
         zIndex: 40,
-        padding: "14px 24px",
+        padding: "16px 24px",
       }}
     >
-      <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          maxWidth: "1240px",
+          margin: "0 auto",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <button
           onClick={onBack}
           disabled={currentStep === 0}
           className="btn-ghost"
-          style={{ opacity: currentStep === 0 ? 0.4 : 1, cursor: currentStep === 0 ? "not-allowed" : "pointer" }}
+          style={{
+            opacity: currentStep === 0 ? 0.35 : 1,
+            cursor: currentStep === 0 ? "not-allowed" : "pointer",
+          }}
         >
-          ← Back
+          <ArrowLeft size={16} />
+          <span>Previous Step</span>
         </button>
 
         <div className="flex items-center gap-3">
-          <button onClick={onSaveDraft} className="btn-secondary hidden sm:inline-flex">
-            Save Draft
+          <button
+            onClick={onSaveDraft}
+            className="btn-secondary hidden sm:inline-flex"
+            style={{ padding: "8px 20px" }}
+          >
+            <span>Save Draft</span>
           </button>
 
           {currentStep < 4 ? (
-            <button onClick={onNext} className="btn-primary">
-              Continue to Step {currentStep + 2} →
+            <button onClick={onNext} className="btn-primary" style={{ padding: "10px 26px" }}>
+              <span>Continue to Step 0{currentStep + 2}</span>
+              <ArrowRight size={16} strokeWidth={2.2} />
             </button>
           ) : (
             <button
               onClick={onGenerate}
               className="btn-primary"
-              style={{ background: "linear-gradient(135deg, #0EA5A0 0%, #14B8A6 50%, #22C55E 100%)", padding: "12px 28px" }}
+              style={{
+                backgroundColor: THEME.ink,
+                padding: "12px 32px",
+                fontSize: "15px",
+              }}
             >
-              ⚡ Generate Credit Score & AI Explanation
+              <Sparkles size={17} color={THEME.lightSignalOrange} />
+              <span>Generate Credit Score & AI Explanation</span>
             </button>
           )}
         </div>
@@ -950,31 +1555,72 @@ function AnalysisOverlay({ stepText }: { stepText: string }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(10, 25, 41, 0.85)",
-        backdropFilter: "blur(6px)",
+        backgroundColor: "rgba(20, 20, 19, 0.88)",
+        backdropFilter: "blur(8px)",
         zIndex: 100,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        color: "white",
-        padding: 24,
+        color: "#FFFFFF",
+        padding: "24px",
       }}
     >
-      <div className="relative w-20 h-20 mb-6">
-        <div className="absolute inset-0 rounded-full border-4 border-[#0EA5A0]/20 animate-ping" />
-        <div className="w-20 h-20 rounded-full border-4 border-t-[#0EA5A0] border-r-[#22C55E] border-b-transparent border-l-transparent animate-spin flex items-center justify-center">
-          <span className="text-xl">🧠</span>
-        </div>
+      <div
+        style={{
+          width: "72px",
+          height: "72px",
+          borderRadius: "50%",
+          border: "2px solid rgba(255,255,255,0.15)",
+          borderTopColor: THEME.lightSignalOrange,
+          animation: "spin 1s linear infinite",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "24px",
+        }}
+      >
+        <Cpu size={26} color={THEME.lightSignalOrange} />
       </div>
-      <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8, textAlign: "center" }}>
+      <h3
+        style={{
+          fontSize: "24px",
+          fontWeight: 500,
+          marginBottom: "8px",
+          textAlign: "center",
+          color: "#FFFFFF",
+        }}
+      >
         CrediNove AI Engine Processing
       </h3>
-      <p style={{ fontSize: 14, color: "#9CA3AF", marginBottom: 16, textAlign: "center" }}>
+      <p
+        style={{
+          fontSize: "15px",
+          color: THEME.dustTaupe,
+          marginBottom: "24px",
+          textAlign: "center",
+          maxWidth: "400px",
+        }}
+      >
         {stepText}
       </p>
-      <div className="w-64 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-        <div className="bg-gradient-to-r from-[#0EA5A0] to-[#22C55E] h-full w-full animate-pulse" />
+      <div
+        style={{
+          width: "280px",
+          height: "4px",
+          borderRadius: "999px",
+          backgroundColor: "rgba(255,255,255,0.15)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            width: "100%",
+            backgroundColor: THEME.lightSignalOrange,
+            animation: "pulse 1.5s infinite",
+          }}
+        />
       </div>
     </div>
   );
@@ -995,7 +1641,9 @@ export default function AssessmentPage() {
     setIsAnalyzing,
   } = useAssessment();
 
-  const [loadingStepText, setLoadingStepText] = useState("Calibrating traditional financial records...");
+  const [loadingStepText, setLoadingStepText] = useState(
+    "Calibrating traditional financial records..."
+  );
 
   const handleGenerateScore = () => {
     setIsAnalyzing(true);
@@ -1017,23 +1665,23 @@ export default function AssessmentPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F7FAFA" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: THEME.canvas }}>
       <Navbar />
 
-      <div style={{ paddingTop: 64 }}>
+      <div style={{ paddingTop: "76px" }}>
         <PageHeader />
         <ProgressBar currentStep={currentStep} onSelectStep={(s) => setCurrentStep(s)} />
 
-        {/* Main 2-column form & sidebar */}
+        {/* Main Form & Sidebar Layout */}
         <div
           style={{
-            maxWidth: 1280,
+            maxWidth: "1240px",
             margin: "0 auto",
-            padding: "28px 24px 120px",
+            padding: "36px 24px 140px",
           }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
-            {/* Form area */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start">
+            {/* Form Steps */}
             <div>
               {currentStep === 0 && <StepPersonal />}
               {currentStep === 1 && <StepFinancial />}
@@ -1042,7 +1690,7 @@ export default function AssessmentPage() {
               {currentStep === 4 && <StepReview onEdit={(s) => setCurrentStep(s)} />}
             </div>
 
-            {/* Sidebar */}
+            {/* Live Sidebar */}
             <AssessmentSidebar />
           </div>
         </div>
@@ -1056,32 +1704,34 @@ export default function AssessmentPage() {
         onGenerate={handleGenerateScore}
       />
 
-      {/* Save draft toast */}
+      {/* Save Draft Toast */}
       {savedDraftToast && (
         <div
           style={{
             position: "fixed",
-            bottom: 84,
+            bottom: "90px",
             left: "50%",
             transform: "translateX(-50%)",
-            background: "#1A2B3C",
-            color: "white",
-            padding: "10px 22px",
-            borderRadius: 8,
-            fontSize: 14,
-            fontWeight: 600,
+            backgroundColor: THEME.ink,
+            color: THEME.canvas,
+            padding: "12px 28px",
+            borderRadius: "999px",
+            fontSize: "14px",
+            fontWeight: 500,
             zIndex: 60,
             display: "flex",
             alignItems: "center",
-            gap: 8,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+            gap: "10px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
           }}
+          className="animate-fade-in"
         >
-          <span style={{ color: "#22C55E" }}>✓</span> Draft saved successfully to local storage
+          <Check size={16} color={THEME.lightSignalOrange} strokeWidth={2.5} />
+          <span>Draft saved successfully to local storage</span>
         </div>
       )}
 
-      {/* Loading sequence overlay */}
+      {/* Loading Overlay */}
       {isAnalyzing && <AnalysisOverlay stepText={loadingStepText} />}
     </div>
   );

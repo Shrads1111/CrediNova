@@ -1,474 +1,461 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Search,
+  Scale,
+  ShieldCheck,
+  Cpu,
+  Zap,
+  ChevronRight,
+  ChevronDown,
+  Globe,
+  Linkedin,
+  Facebook,
+  Twitter,
+  Youtube,
+  HelpCircle,
+  CreditCard,
+  MapPin,
+  Mail,
+  Building,
+  Users,
+  Layers,
+  TrendingUp,
+  BarChart3,
+  Sparkles,
+  Phone,
+} from "lucide-react";
 import { Navbar, Logo } from "../components/common/Navbar";
 
-// ─── Colors & tokens ────────────────────────────────────────────────────────
-const C = {
-  navy: "#0F1E2E",
-  navyMid: "#1A2B3C",
-  slate: "#4B5563",
-  muted: "#6B7280",
-  light: "#9CA3AF",
-  border: "#E2E6EA",
-  surface: "#F7F9FA",
+// ─── Design Tokens ───────────────────────────────────────────────────────────
+const THEME = {
+  canvas: "#F3F0EE",
+  lifted: "#FCFBFA",
   white: "#FFFFFF",
-  teal: "#0EA5A0",
-  tealDk: "#0B8C87",
-  green: "#22C55E",
-  greenDk: "#16A34A",
-  amber: "#F59E0B",
-  red: "#EF4444",
+  softBone: "#F4F4F4",
+  ink: "#141413",
+  charcoal: "#262627",
+  signalOrange: "#CF4500",
+  lightSignalOrange: "#F37338",
+  clayBrown: "#9A3A0A",
+  slateGray: "#696969",
+  granite: "#555555",
+  dustTaupe: "#D1CDC7",
+  borderLight: "#E2DED9",
+  borderSubtle: "rgba(20, 20, 19, 0.08)",
+  linkBlue: "#3860BE",
 };
 
-// ─── Micro icons ─────────────────────────────────────────────────────────────
-const ChevronRight = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
-);
-const ArrowUpRight = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
-  </svg>
-);
-const CheckIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-const MailIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-  </svg>
-);
-const PhoneIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.8a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z" />
-  </svg>
-);
-const LinkedInIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
-    <rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" />
-  </svg>
-);
-const XIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
-
-// ─── Announcement bar ────────────────────────────────────────────────────────
+// ─── Announcement Bar ────────────────────────────────────────────────────────
 function AnnouncementBar() {
   return (
     <div
       style={{
-        background: C.navy,
-        color: "rgba(255,255,255,0.82)",
-        fontSize: "12.5px",
+        background: THEME.ink,
+        color: "#F3F0EE",
+        fontSize: "13px",
         textAlign: "center",
-        padding: "8px 16px",
-        fontFamily: "'DM Sans', sans-serif",
-        letterSpacing: "0.01em",
+        padding: "10px 16px",
+        fontFamily: "'Sofia Sans', 'Inter', sans-serif",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
+        gap: "10px",
         flexWrap: "wrap",
       }}
     >
-      <span style={{ color: C.teal, fontWeight: 700 }}>●</span>
-      <span>AI-Powered Credit Scoring Trusted by Financial Institutions Nationwide</span>
-      <Link to="/judge" style={{ color: C.teal, textDecoration: "none", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 3 }}>
-        Explore Model Performance & Analytics <ArrowUpRight />
+      <span
+        style={{
+          width: "7px",
+          height: "7px",
+          borderRadius: "50%",
+          backgroundColor: THEME.lightSignalOrange,
+          display: "inline-block",
+        }}
+      />
+      <span style={{ fontWeight: 450, opacity: 0.9 }}>
+        AI-Powered Credit Intelligence Trusted by Financial Institutions Nationwide
+      </span>
+      <Link
+        to="/judge"
+        style={{
+          color: THEME.lightSignalOrange,
+          textDecoration: "none",
+          fontWeight: 600,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px",
+          marginLeft: "6px",
+        }}
+      >
+        Explore Model Performance & Analytics <ArrowUpRight size={14} />
       </Link>
     </div>
   );
 }
 
-// ─── Hero ────────────────────────────────────────────────────────────────────
+// ─── Hero Section ────────────────────────────────────────────────────────────
 function Hero() {
   return (
-    <section id="home" style={{ paddingTop: "64px", background: C.white }}>
-      <div style={{ borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "56px 24px 0" }}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left col */}
-            <div style={{ paddingBottom: "48px" }}>
-              <p style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: C.teal, marginBottom: "14px" }}>
-                AI-Powered Credit Intelligence
-              </p>
-              <h1
-                style={{
-                  fontSize: "clamp(32px, 4.5vw, 48px)",
-                  fontWeight: 800,
-                  color: C.navy,
-                  lineHeight: 1.15,
-                  letterSpacing: "-0.03em",
-                  marginBottom: "20px",
-                  maxWidth: "540px",
-                }}
-              >
-                Smarter Credit Decisions,{" "}
-                <span style={{ color: C.teal }}>Built on Better Data</span>
-              </h1>
-              <p
-                style={{
-                  fontSize: "16px",
-                  lineHeight: 1.65,
-                  color: C.slate,
-                  maxWidth: "480px",
-                  marginBottom: "32px",
-                }}
-              >
-                CrediNove AI combines bureau records with alternative signals — utility punctuality, cash flow velocity, and digital transaction behavior — to deliver accurate, fair, and explainable credit assessments for modern banking.
-              </p>
-              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "48px" }}>
-                <Link to="/assessment" className="btn-primary" style={{ textDecoration: "none", padding: "12px 24px" }}>
-                  Start Assessment <ChevronRight />
-                </Link>
-                <Link to="/judge" className="btn-secondary" style={{ textDecoration: "none", padding: "11px 20px" }}>
-                  Judge Analytics Dashboard
-                </Link>
-              </div>
-              {/* Credibility row */}
-              <div style={{ display: "flex", gap: "36px", flexWrap: "wrap" }}>
-                {[
-                  { val: "98.2%", label: "Assessment accuracy" },
-                  { val: "200+", label: "Financial institutions" },
-                  { val: "<3s", label: "Average scoring time" },
-                ].map((s) => (
-                  <div key={s.val}>
-                    <p style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: "24px", color: C.navy, letterSpacing: "-0.02em" }}>
-                      {s.val}
-                    </p>
-                    <p style={{ fontSize: "13px", color: C.muted, marginTop: "2px" }}>{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right col with illustration card */}
-            <div style={{ position: "relative", minHeight: "380px" }}>
-              <img
-                src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=760&h=560&fit=crop&auto=format&q=85"
-                alt="Financial analysts analyzing real-time data"
-                style={{ width: "100%", height: "420px", objectFit: "cover", borderRadius: "12px", display: "block" }}
-              />
-              {/* Floating live card */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "24px",
-                  left: "20px",
-                  background: C.white,
-                  border: `1px solid ${C.border}`,
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                  borderRadius: "10px",
-                  padding: "16px 22px",
-                  minWidth: "220px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: C.green }} />
-                  <p style={{ fontSize: "11.5px", fontWeight: 700, color: C.muted, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                    Live Processing
-                  </p>
-                </div>
-                <p style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: "28px", color: C.navy, letterSpacing: "-0.02em", lineHeight: 1 }}>
-                  98.2%
-                </p>
-                <p style={{ fontSize: "12.5px", color: C.muted, marginTop: "4px" }}>Scoring accuracy · Q3 2026</p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <section
+      id="home"
+      style={{
+        paddingTop: "110px",
+        paddingBottom: "80px",
+        background: THEME.canvas,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Background Ghost Watermark */}
+      <div
+        className="ghost-watermark hidden md:block"
+        style={{
+          position: "absolute",
+          top: "80px",
+          right: "-40px",
+          zIndex: 0,
+        }}
+      >
+        INTELLIGENCE
       </div>
 
-      {/* Trust bar */}
-      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", gap: "36px", flexWrap: "wrap" }}>
-          <p style={{ fontSize: "11.5px", fontWeight: 700, color: C.light, letterSpacing: "0.07em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-            Trusted by
-          </p>
-          <div style={{ width: "1px", height: "20px", background: C.border }} />
-          {[
-            ["NB", "National Bank"],
-            ["PF", "Pacific Finance"],
-            ["MC", "Metro Credit Union"],
-            ["GT", "Global Trust"],
-            ["FB", "First Banking Corp"],
-          ].map(([abbr, name]) => (
-            <div key={abbr} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: 0.75 }}>
-              <div
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "6px",
-                  background: C.navyMid,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: C.white,
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  fontFamily: "'Manrope', sans-serif",
-                }}
-              >
-                {abbr}
-              </div>
-              <span style={{ fontSize: "13.5px", fontWeight: 600, color: C.navyMid }}>{name}</span>
+      <div
+        style={{
+          maxWidth: "1240px",
+          margin: "0 auto",
+          padding: "0 24px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          {/* Left Hero Column */}
+          <div className="lg:col-span-6" style={{ paddingRight: "10px" }}>
+            <div className="eyebrow" style={{ marginBottom: "18px" }}>
+              <span className="eyebrow-dot" />
+              <span>AI-POWERED CREDIT INTELLIGENCE</span>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-// ─── Features / Why CrediNove ────────────────────────────────────────────────
-function Features() {
-  const features = [
-    {
-      num: "01",
-      title: "AI-Powered Assessment",
-      desc: "Proprietary machine learning models analyse hundreds of variables simultaneously — producing credit scores that outperform bureau-only models by a measurable margin.",
-      points: ["Neural credit modelling", "Real-time decisioning", "Adaptive learning from outcomes"],
-    },
-    {
-      num: "02",
-      title: "Alternative Data Signals",
-      desc: "Overcome thin-file limitations by incorporating utility payments, rent history, e-commerce behaviour, and mobile money flows to build complete borrower profiles.",
-      points: ["Utility & rental history", "Cash flow analytics", "Transaction behaviour"],
-    },
-    {
-      num: "03",
-      title: "Explainable Decisions",
-      desc: "Every score comes with transparent factor attribution — satisfying regulatory requirements and giving borrowers meaningful insight into the decision.",
-      points: ["Fair lending compliant", "Auditable factor scores", "Bias detection & monitoring"],
-    },
-  ];
-
-  return (
-    <section id="about" style={{ padding: "88px 0", background: C.white }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
-        {/* Header row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start mb-14">
-          <div>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: C.teal, marginBottom: "12px" }}>
-              Why CrediNove
-            </p>
-            <h2 style={{ fontSize: "clamp(26px,3.5vw,36px)", fontWeight: 800, color: C.navy, lineHeight: 1.2 }}>
-              Credit intelligence that goes further than a bureau score
-            </h2>
-          </div>
-          <div style={{ paddingTop: "12px" }}>
-            <p style={{ fontSize: "15.5px", lineHeight: 1.65, color: C.slate }}>
-              Three foundational capabilities that make CrediNove AI the most trusted credit assessment platform for banks, fintechs, and microfinance institutions.
-            </p>
-            <a
-              href="#services"
+            <h1
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                marginTop: "16px",
-                fontSize: "13.5px",
-                fontWeight: 600,
-                color: C.teal,
-                textDecoration: "none",
+                fontSize: "clamp(38px, 5.2vw, 64px)",
+                fontWeight: 500,
+                color: THEME.ink,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.05,
+                marginBottom: "24px",
               }}
             >
-              Explore all capabilities <ArrowUpRight />
-            </a>
-          </div>
-        </div>
+              Smarter credit decisions, built on better data.
+            </h1>
 
-        {/* Feature rows */}
-        <div style={{ borderTop: `1px solid ${C.border}` }}>
-          {features.map((f) => (
-            <div
-              key={f.num}
-              className="grid grid-cols-1 md:grid-cols-[60px_1.2fr_1fr] gap-6 md:gap-10 py-10 items-start border-b border-[#E2E6EA]"
+            <p
+              style={{
+                fontSize: "17px",
+                lineHeight: 1.5,
+                color: THEME.charcoal,
+                fontWeight: 450,
+                maxWidth: "520px",
+                marginBottom: "36px",
+              }}
             >
-              <p style={{ fontFamily: "'Manrope', sans-serif", fontSize: "14px", fontWeight: 800, color: C.teal, letterSpacing: "0.04em" }}>
-                {f.num}
-              </p>
-              <div>
-                <h3 style={{ fontSize: "19px", fontWeight: 700, color: C.navy, marginBottom: "10px" }}>{f.title}</h3>
-                <p style={{ fontSize: "15px", lineHeight: 1.6, color: C.slate }}>{f.desc}</p>
-              </div>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                {f.points.map((p) => (
-                  <li key={p} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "18px",
-                        height: "18px",
-                        borderRadius: "50%",
-                        background: C.teal,
-                        color: "white",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <CheckIcon />
-                    </span>
-                    <span style={{ fontSize: "14px", color: C.slate }}>{p}</span>
-                  </li>
-                ))}
-              </ul>
+              CrediNove AI combines traditional bureau history with alternative digital signals —
+              utility punctuality, cash flow velocity, and digital transaction behavior — to deliver
+              accurate, fair, and explainable credit assessments.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "14px",
+                flexWrap: "wrap",
+                alignItems: "center",
+                marginBottom: "52px",
+              }}
+            >
+              <Link to="/assessment" className="btn-primary" style={{ padding: "12px 28px" }}>
+                <span>Start Assessment</span>
+                <ArrowRight size={17} strokeWidth={2.2} />
+              </Link>
+              <Link to="/judge" className="btn-secondary" style={{ padding: "12px 24px" }}>
+                <Scale size={16} strokeWidth={2} />
+                <span>Judge Analytics Dashboard</span>
+              </Link>
             </div>
-          ))}
+
+            {/* Credibility Metric Row */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "24px",
+                paddingTop: "28px",
+                borderTop: `1px solid ${THEME.borderLight}`,
+              }}
+            >
+              <div>
+                <p
+                  style={{
+                    fontFamily: "'Sofia Sans', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "32px",
+                    color: THEME.ink,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                  }}
+                >
+                  98.2%
+                </p>
+                <p style={{ fontSize: "13px", color: THEME.slateGray, marginTop: "6px" }}>
+                  Scoring accuracy
+                </p>
+              </div>
+              <div>
+                <p
+                  style={{
+                    fontFamily: "'Sofia Sans', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "32px",
+                    color: THEME.ink,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                  }}
+                >
+                  200+
+                </p>
+                <p style={{ fontSize: "13px", color: THEME.slateGray, marginTop: "6px" }}>
+                  Institutions
+                </p>
+              </div>
+              <div>
+                <p
+                  style={{
+                    fontFamily: "'Sofia Sans', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "32px",
+                    color: THEME.ink,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                  }}
+                >
+                  &lt;3s
+                </p>
+                <p style={{ fontSize: "13px", color: THEME.slateGray, marginTop: "6px" }}>
+                  Decision time
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Hero Column: Stadium Frame with Circular Portrait & Satellite CTA */}
+          <div className="lg:col-span-6">
+            <div
+              className="stadium-frame"
+              style={{
+                background: THEME.lifted,
+                border: `1px solid ${THEME.borderSubtle}`,
+                boxShadow: "0px 24px 48px rgba(0, 0, 0, 0.08)",
+                padding: "36px",
+                position: "relative",
+              }}
+            >
+              {/* Orbital SVG Decorative Arc */}
+              <svg
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  pointerEvents: "none",
+                  zIndex: 0,
+                }}
+              >
+                <path
+                  d="M 60 80 Q 280 20 420 220 T 260 400"
+                  fill="none"
+                  stroke={THEME.lightSignalOrange}
+                  strokeWidth="1.5"
+                  strokeDasharray="4 4"
+                  opacity="0.8"
+                />
+              </svg>
+
+              <div
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                {/* Circular Portrait with Docked Satellite CTA */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "280px",
+                    height: "280px",
+                    marginBottom: "28px",
+                  }}
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&h=600&fit=crop&crop=faces&auto=format&q=85"
+                    alt="Financial intelligence modeling"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      boxShadow: "0px 16px 36px rgba(0, 0, 0, 0.12)",
+                    }}
+                  />
+                  {/* Attached White Satellite Micro-CTA */}
+                  <Link
+                    to="/assessment"
+                    className="satellite-cta"
+                    style={{
+                      position: "absolute",
+                      bottom: "-8px",
+                      right: "-8px",
+                    }}
+                    title="Launch assessment"
+                  >
+                    <ArrowRight size={22} color={THEME.ink} strokeWidth={2.2} />
+                  </Link>
+                </div>
+
+                {/* Overlaid Card Info */}
+                <div
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "24px",
+                    padding: "20px 24px",
+                    width: "100%",
+                    maxWidth: "420px",
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)",
+                    border: `1px solid ${THEME.borderLight}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                      style={{
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "#16A34A",
+                      }}
+                    />
+                    <div>
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          color: THEME.slateGray,
+                          letterSpacing: "0.04em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Live Intelligence Engine
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: "'Sofia Sans', sans-serif",
+                          fontSize: "20px",
+                          fontWeight: 700,
+                          color: THEME.ink,
+                          margin: "2px 0 0",
+                        }}
+                      >
+                        Rahul Sharma · 782 CIBIL
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    style={{
+                      backgroundColor: "rgba(34, 197, 94, 0.12)",
+                      color: "#16A34A",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      padding: "4px 12px",
+                      borderRadius: "999px",
+                    }}
+                  >
+                    Tier 1 (Prime)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
-  );
-}
 
-// ─── Financial Inclusion ─────────────────────────────────────────────────────
-function FinancialInclusion() {
-  return (
-    <section style={{ background: C.surface, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto" }} className="grid grid-cols-1 lg:grid-cols-2">
-        {/* Image panel */}
-        <div style={{ position: "relative", minHeight: "440px" }}>
-          <img
-            src="https://images.unsplash.com/photo-1573167507387-6b4b98cb7c13?w=640&h=520&fit=crop&auto=format&q=85"
-            alt="Banking committee reviewing loan applications"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-          <div
+      {/* Institutional Trust Bar */}
+      <div
+        style={{
+          marginTop: "70px",
+          borderTop: `1px solid ${THEME.borderLight}`,
+          borderBottom: `1px solid ${THEME.borderLight}`,
+          backgroundColor: THEME.lifted,
+          padding: "24px 0",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1240px",
+            margin: "0 auto",
+            padding: "0 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "24px",
+          }}
+        >
+          <p
             style={{
-              position: "absolute",
-              top: "32px",
-              right: "32px",
-              background: C.navy,
-              borderRadius: "10px",
-              padding: "20px 24px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+              fontSize: "13px",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: THEME.slateGray,
             }}
           >
-            <p style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: "32px", color: C.white, lineHeight: 1 }}>
-              47K+
-            </p>
-            <p style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.65)", marginTop: "4px" }}>
-              Loans enabled, Q3 2026
-            </p>
-          </div>
-        </div>
-
-        {/* Content panel */}
-        <div style={{ padding: "64px 40px" }}>
-          <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: C.teal, marginBottom: "14px" }}>
-            Financial Inclusion
+            Trusted by modern banking networks
           </p>
-          <h2 style={{ fontSize: "clamp(24px,3vw,34px)", fontWeight: 800, color: C.navy, lineHeight: 1.25 }}>
-            Credit access for those who deserve it
-          </h2>
-          <div style={{ width: "40px", height: "3px", background: C.teal, margin: "20px 0" }} />
-          <p style={{ fontSize: "15px", lineHeight: 1.65, color: C.slate, marginBottom: "18px" }}>
-            Millions of MSMEs and individuals with thin or absent traditional credit files are excluded from formal lending — not because they are risky, but because traditional scoring cannot see their full financial picture.
-          </p>
-          <p style={{ fontSize: "15px", lineHeight: 1.65, color: C.slate, marginBottom: "32px" }}>
-            CrediNove AI surfaces creditworthiness through alternative data: mobile money flows, utility punctuality, supply chain receipts, and spending patterns — giving lenders the confidence to extend credit responsibly.
-          </p>
-
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "20px",
-              marginBottom: "36px",
-              paddingTop: "24px",
-              borderTop: `1px solid ${C.border}`,
+              display: "flex",
+              alignItems: "center",
+              gap: "36px",
+              flexWrap: "wrap",
             }}
           >
             {[
-              ["1.7B", "Adults globally unbanked"],
-              ["64%", "MSMEs lack credit access"],
-              ["3×", "Better approval rate"],
-            ].map(([val, lbl]) => (
-              <div key={val}>
-                <p style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: "24px", color: C.navy }}>{val}</p>
-                <p style={{ fontSize: "12.5px", color: C.muted, marginTop: "2px" }}>{lbl}</p>
-              </div>
-            ))}
-          </div>
-          <Link to="/assessment" className="btn-secondary" style={{ textDecoration: "none" }}>
-            Run Live Assessment <ChevronRight />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── How It Works ────────────────────────────────────────────────────────────
-function HowItWorks() {
-  const steps = [
-    { num: "1", title: "Data Collection", desc: "Securely ingesting bureau data, utility records, transaction history, and mobile payment signals." },
-    { num: "2", title: "AI Analysis", desc: "Models process hundreds of variables simultaneously, surfacing patterns invisible to conventional scoring." },
-    { num: "3", title: "Credit Scoring", desc: "A composite credit score calibrated against real-world repayment data is generated in under three seconds." },
-    { num: "4", title: "Explainability", desc: "Clear factor attribution is produced alongside every score, satisfying fair lending regulation." },
-    { num: "5", title: "Loan Decision", desc: "Lenders receive actionable recommendations with risk tier, confidence interval, and recommended terms." },
-  ];
-
-  return (
-    <section id="how-it-works" style={{ padding: "88px 0", background: C.white }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
-        <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-14 items-start">
-          {/* Left info */}
-          <div>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: C.teal, marginBottom: "12px" }}>
-              The Process
-            </p>
-            <h2 style={{ fontSize: "clamp(24px,3vw,34px)", fontWeight: 800, color: C.navy, lineHeight: 1.25 }}>
-              From data to decision in seconds
-            </h2>
-            <div style={{ width: "36px", height: "3px", background: C.teal, margin: "20px 0" }} />
-            <p style={{ fontSize: "15px", lineHeight: 1.65, color: C.slate, marginBottom: "28px" }}>
-              A streamlined five-stage pipeline that turns raw financial and behavioral signals into confident lending decisions.
-            </p>
-            <Link to="/judge" className="btn-primary" style={{ textDecoration: "none" }}>
-              See Technical Audit Overview <ChevronRight />
-            </Link>
-          </div>
-
-          {/* Steps */}
-          <div>
-            {steps.map((s, i) => (
-              <div key={s.num} style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: "20px", position: "relative" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <div
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      background: i === 0 ? C.teal : C.white,
-                      border: `2px solid ${i === 0 ? C.teal : C.border}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      zIndex: 1,
-                    }}
-                  >
-                    <span style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: "13px", color: i === 0 ? C.white : C.muted }}>
-                      {s.num}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div style={{ width: "1px", flex: 1, background: C.border, margin: "6px 0", minHeight: "44px" }} />
-                  )}
-                </div>
-                <div style={{ paddingBottom: i < steps.length - 1 ? "28px" : "0", paddingTop: "6px" }}>
-                  <h3 style={{ fontSize: "16px", fontWeight: 700, color: C.navy, marginBottom: "6px" }}>{s.title}</h3>
-                  <p style={{ fontSize: "14px", lineHeight: 1.6, color: C.muted }}>{s.desc}</p>
-                </div>
-              </div>
+              "National Bank",
+              "Pacific Finance Corp",
+              "Metro Credit Union",
+              "Global Trust",
+              "First Banking Group",
+            ].map((name) => (
+              <span
+                key={name}
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 600,
+                  color: THEME.ink,
+                  opacity: 0.7,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {name}
+              </span>
             ))}
           </div>
         </div>
@@ -477,131 +464,735 @@ function HowItWorks() {
   );
 }
 
-// ─── Services ────────────────────────────────────────────────────────────────
-function Services() {
-  const services = [
-    { title: "Credit Scoring", desc: "Comprehensive individual and business scores combining 200+ variables from bureau and alternative data.", tag: "Core", tagColor: C.teal },
-    { title: "Risk Analysis", desc: "Portfolio-level monitoring with stress testing, real-time alerts, and predictive default modelling.", tag: "Enterprise", tagColor: C.navyMid },
-    { title: "Loan Assessment", desc: "Automated end-to-end evaluation: document analysis, income verification, and capacity-to-pay modelling.", tag: "Popular", tagColor: C.green },
-    { title: "AI Insights", desc: "Actionable dashboards surfacing market trends, borrower segments, and portfolio optimisation opportunities.", tag: "New", tagColor: C.amber },
+// ─── Constellation / Services Section ────────────────────────────────────────
+function ConstellationServices() {
+  const serviceCards = [
+    {
+      img: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=500&h=500&fit=crop&crop=faces&auto=format&q=85",
+      eyebrow: "SERVICES",
+      title: "Credit Scoring & Modeling",
+      desc: "Composite credit scores calibrated against 200+ multi-dimensional behavioral variables in real-time.",
+      link: "/assessment",
+    },
+    {
+      img: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=500&h=500&fit=crop&crop=faces&auto=format&q=85",
+      eyebrow: "ALTERNATIVE DATA",
+      title: "Thin-File Inclusion",
+      desc: "Surface creditworthiness through utility punctuality, telecom flows, and merchant cash flow velocity.",
+      link: "/assessment",
+    },
+    {
+      img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&h=500&fit=crop&crop=faces&auto=format&q=85",
+      eyebrow: "EXPLAINABILITY",
+      title: "Model Transparency & SHAP",
+      desc: "Per-decision feature attribution providing clear factor breakdown for regulatory auditability.",
+      link: "/judge",
+    },
   ];
 
   return (
-    <section id="services" style={{ padding: "88px 0", background: C.surface, borderTop: `1px solid ${C.border}` }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "48px", flexWrap: "wrap", gap: "20px" }}>
-          <div>
-            <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: C.teal, marginBottom: "12px" }}>
-              Our Services
-            </p>
-            <h2 style={{ fontSize: "clamp(24px,3vw,34px)", fontWeight: 800, color: C.navy }}>
-              Full-spectrum credit intelligence
-            </h2>
-          </div>
-          <Link to="/assessment" className="btn-secondary" style={{ textDecoration: "none" }}>
-            Launch Assessment Tool <ChevronRight />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {services.map((s) => (
-            <ServiceCard key={s.title} service={s} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ServiceCard({ service }: { service: { title: string; desc: string; tag: string; tagColor: string } }) {
-  const [hov, setHov] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
+    <section
+      id="services"
       style={{
-        background: C.white,
-        border: `1px solid ${hov ? "#0EA5A0" : C.border}`,
-        borderRadius: "12px",
-        padding: "32px 26px",
-        cursor: "pointer",
-        transition: "all 0.2s ease",
-        transform: hov ? "translateY(-3px)" : "none",
-        boxShadow: hov ? "0 8px 24px rgba(14,165,160,0.12)" : "0 2px 8px rgba(0,0,0,0.03)",
+        padding: "110px 0",
+        background: THEME.canvas,
         position: "relative",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "18px" }}>
-        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: service.tagColor, marginTop: "6px" }} />
-        <span
-          style={{
-            fontSize: "11px",
-            fontWeight: 700,
-            color: service.tagColor,
-            border: `1px solid ${service.tagColor}`,
-            borderRadius: "4px",
-            padding: "2px 8px",
-            letterSpacing: "0.04em",
-          }}
-        >
-          {service.tag}
-        </span>
-      </div>
-      <h3 style={{ fontSize: "18px", fontWeight: 700, color: C.navy, marginBottom: "10px" }}>{service.title}</h3>
-      <p style={{ fontSize: "13.5px", lineHeight: 1.6, color: C.muted, marginBottom: "20px" }}>{service.desc}</p>
+      {/* Background Ghost Watermark */}
       <div
+        className="ghost-watermark hidden md:block"
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          fontSize: "13px",
-          fontWeight: 600,
-          color: hov ? C.teal : C.light,
-          transition: "color 0.2s",
+          position: "absolute",
+          top: "60px",
+          left: "20px",
+          zIndex: 0,
         }}
       >
-        Learn more <ArrowUpRight />
+        CONSTELLATION
       </div>
-    </div>
+
+      <div
+        style={{
+          maxWidth: "1240px",
+          margin: "0 auto",
+          padding: "0 24px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Section Header */}
+        <div
+          style={{
+            maxWidth: "680px",
+            marginBottom: "72px",
+          }}
+        >
+          <div className="eyebrow" style={{ marginBottom: "14px" }}>
+            <span className="eyebrow-dot" />
+            <span>SOLUTIONS & CAPABILITIES</span>
+          </div>
+          <h2
+            style={{
+              fontSize: "clamp(30px, 4vw, 42px)",
+              fontWeight: 500,
+              color: THEME.ink,
+              lineHeight: 1.15,
+            }}
+          >
+            A constellation of intelligent lending services.
+          </h2>
+          <p
+            style={{
+              fontSize: "17px",
+              color: THEME.charcoal,
+              marginTop: "16px",
+              fontWeight: 450,
+            }}
+          >
+            Each module functions autonomously or connects as a unified pipeline — giving financial
+            institutions total precision from ingestion to decision.
+          </p>
+        </div>
+
+        {/* Circular Cards Grid with Orbital Connection Line */}
+        <div style={{ position: "relative" }}>
+          {/* Orbital SVG Line across cards */}
+          <svg
+            className="hidden lg:block"
+            style={{
+              position: "absolute",
+              top: "140px",
+              left: "8%",
+              width: "84%",
+              height: "120px",
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          >
+            <path
+              d="M 50 40 Q 380 -20 720 70 T 1100 20"
+              fill="none"
+              stroke={THEME.lightSignalOrange}
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+            />
+          </svg>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 relative z-10">
+            {serviceCards.map((card, idx) => (
+              <div
+                key={card.title}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
+                {/* Circular Portrait with Docked Satellite CTA */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "260px",
+                    height: "260px",
+                    marginBottom: "28px",
+                  }}
+                >
+                  <img
+                    src={card.img}
+                    alt={card.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      boxShadow: "0px 16px 36px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Link
+                    to={card.link}
+                    className="satellite-cta"
+                    style={{
+                      position: "absolute",
+                      bottom: "-6px",
+                      right: "-6px",
+                    }}
+                    title={`Explore ${card.title}`}
+                  >
+                    <ArrowRight size={20} color={THEME.ink} strokeWidth={2.2} />
+                  </Link>
+                </div>
+
+                {/* Eyebrow Label with Signal Orange Dot */}
+                <div className="eyebrow" style={{ marginBottom: "10px" }}>
+                  <span className="eyebrow-dot" />
+                  <span>{card.eyebrow}</span>
+                </div>
+
+                <h3
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: 500,
+                    color: THEME.ink,
+                    marginBottom: "10px",
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {card.title}
+                </h3>
+
+                <p
+                  style={{
+                    fontSize: "15px",
+                    lineHeight: 1.5,
+                    color: THEME.slateGray,
+                    maxWidth: "320px",
+                  }}
+                >
+                  {card.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-// ─── CTA ─────────────────────────────────────────────────────────────────────
-function CTA() {
+// ─── Pill Carousel / Featured Stories Section ────────────────────────────────
+function PillCarouselSection() {
+  const stories = [
+    {
+      category: "Case Study",
+      headline: "How Pacific Finance expanded MSME loan approvals by 42%",
+      body: "By incorporating utility punctuality and cash flow telemetry, Pacific unlocked lending to 18,000 previously unserved micro-enterprises.",
+      badge: "Commercial Banking",
+      cta: "Read Case Study",
+      link: "/assessment",
+    },
+    {
+      category: "Innovation",
+      headline: "Zero-bias credit assessment across demographic cohorts",
+      body: "Our multi-layer algorithmic fairness engine enforces strict demographic parity without sacrificing risk predictive accuracy.",
+      badge: "Fair Lending AI",
+      cta: "View Audit Metrics",
+      link: "/judge",
+    },
+  ];
+
   return (
-    <section style={{ background: C.navy }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 24px" }}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-          {/* Left */}
-          <div style={{ padding: "72px 40px 72px 0", borderRight: "1px solid rgba(255,255,255,0.08)" }}>
-            <p style={{ fontSize: "11px", fontWeight: 700, color: C.teal, letterSpacing: "0.09em", textTransform: "uppercase", marginBottom: "16px" }}>
-              Get Started
-            </p>
-            <h2 style={{ fontSize: "clamp(26px, 3.5vw, 38px)", fontWeight: 800, color: C.white, lineHeight: 1.2, marginBottom: "20px" }}>
-              Ready to transform credit assessment?
+    <section
+      style={{
+        padding: "100px 0",
+        background: THEME.lifted,
+        borderTop: `1px solid ${THEME.borderLight}`,
+        borderBottom: `1px solid ${THEME.borderLight}`,
+      }}
+    >
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
+            <div className="eyebrow" style={{ marginBottom: "12px" }}>
+              <span className="eyebrow-dot" />
+              <span>IMPACT & EVIDENCE</span>
+            </div>
+            <h2
+              style={{
+                fontSize: "clamp(28px, 3.5vw, 38px)",
+                fontWeight: 500,
+                color: THEME.ink,
+              }}
+            >
+              Proven outcomes in production banking.
             </h2>
-            <p style={{ fontSize: "15.5px", lineHeight: 1.65, color: "rgba(255,255,255,0.65)", maxWidth: "420px" }}>
-              Join forward-thinking banks and financial institutions using CrediNove AI to approve more qualified borrowers, minimize default risk, and expand portfolios responsibly.
+          </div>
+          <Link to="/judge" className="btn-secondary">
+            <span>Explore Technical Dashboard</span>
+            <ArrowUpRight size={16} />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {stories.map((story) => (
+            <div
+              key={story.headline}
+              className="stadium-frame"
+              style={{
+                background: THEME.canvas,
+                border: `1px solid ${THEME.borderLight}`,
+                padding: "44px 38px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                minHeight: "360px",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.03)",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <span className="pill-chip">{story.category}</span>
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      color: THEME.slateGray,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {story.badge}
+                  </span>
+                </div>
+                <h3
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: 500,
+                    color: THEME.ink,
+                    lineHeight: 1.25,
+                    marginBottom: "14px",
+                  }}
+                >
+                  {story.headline}
+                </h3>
+                <p
+                  style={{
+                    fontSize: "15.5px",
+                    lineHeight: 1.55,
+                    color: THEME.charcoal,
+                  }}
+                >
+                  {story.body}
+                </p>
+              </div>
+
+              <div style={{ marginTop: "32px" }}>
+                <Link
+                  to={story.link}
+                  className="btn-primary"
+                  style={{ padding: "10px 24px" }}
+                >
+                  <span>{story.cta}</span>
+                  <ArrowRight size={16} strokeWidth={2.2} />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── How It Works (5-Stage Decision Pipeline) ────────────────────────────────
+function HowItWorks() {
+  const steps = [
+    {
+      num: "01",
+      title: "Data Ingestion",
+      desc: "Securely aggregate bureau records, digital payment telemetry, and utility punctuality.",
+      icon: Layers,
+    },
+    {
+      num: "02",
+      title: "Feature Engineering",
+      desc: "Synthesize 200+ alternative variables including debt service velocity and cash-flow regularity.",
+      icon: Cpu,
+    },
+    {
+      num: "03",
+      title: "Ensemble AI Scoring",
+      desc: "Real-time probability calculation combining gradient boosted trees with calibrated neural heads.",
+      icon: Sparkles,
+    },
+    {
+      num: "04",
+      title: "Explainable Attribution",
+      desc: "Produce compliant factor contributions (SHAP values) satisfying RBI and Basel III standards.",
+      icon: BarChart3,
+    },
+    {
+      num: "05",
+      title: "Underwriting Decision",
+      desc: "Deliver instant loan term recommendations, risk categorization, and maximum credit limits.",
+      icon: ShieldCheck,
+    },
+  ];
+
+  return (
+    <section
+      id="how-it-works"
+      style={{
+        padding: "110px 0",
+        background: THEME.canvas,
+      }}
+    >
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left Column */}
+          <div className="lg:col-span-4">
+            <div className="eyebrow" style={{ marginBottom: "14px" }}>
+              <span className="eyebrow-dot" />
+              <span>THE PIPELINE</span>
+            </div>
+            <h2
+              style={{
+                fontSize: "clamp(30px, 3.8vw, 42px)",
+                fontWeight: 500,
+                color: THEME.ink,
+                lineHeight: 1.15,
+                marginBottom: "20px",
+              }}
+            >
+              From data to decision in three seconds.
+            </h2>
+            <p
+              style={{
+                fontSize: "16px",
+                lineHeight: 1.55,
+                color: THEME.charcoal,
+                marginBottom: "32px",
+              }}
+            >
+              A deterministic five-stage intelligence pipeline ensuring absolute mathematical rigor,
+              regulatory compliance, and real-time processing.
             </p>
+
+            <Link to="/assessment" className="btn-primary" style={{ padding: "12px 28px" }}>
+              <span>Launch Live Flow</span>
+              <ArrowRight size={16} strokeWidth={2.2} />
+            </Link>
           </div>
 
-          {/* Right */}
-          <div style={{ padding: "72px 0 72px 40px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginBottom: "36px", maxWidth: "320px" }}>
-              <Link to="/assessment" className="btn-primary" style={{ textDecoration: "none", padding: "12px 24px" }}>
-                Start Assessment <ChevronRight />
-              </Link>
-              <Link to="/judge" className="btn-secondary" style={{ textDecoration: "none", textAlign: "center" }}>
-                Open Judge Analytics
-              </Link>
-            </div>
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "24px", display: "flex", flexDirection: "column", gap: "10px" }}>
-              {["SOC 2 Type II Certified", "GDPR & CCPA Compliant", "99.9% Uptime SLA", "Basel III & RBI Explainability Compliant"].map((t) => (
-                <div key={t} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span style={{ color: C.teal, display: "flex" }}><CheckIcon /></span>
-                  <span style={{ fontSize: "13.5px", color: "rgba(255,255,255,0.6)" }}>{t}</span>
+          {/* Right Column: Step Cards */}
+          <div className="lg:col-span-8 flex flex-col gap-4">
+            {steps.map((step) => {
+              const IconComponent = step.icon;
+              return (
+                <div
+                  key={step.num}
+                  style={{
+                    backgroundColor: THEME.lifted,
+                    borderRadius: "24px",
+                    padding: "24px 30px",
+                    border: `1px solid ${THEME.borderLight}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "24px",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      backgroundColor: THEME.white,
+                      border: `1.5px solid ${THEME.ink}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "'Sofia Sans', sans-serif",
+                      fontWeight: 700,
+                      fontSize: "16px",
+                      color: THEME.ink,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {step.num}
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      <IconComponent size={17} color={THEME.signalOrange} />
+                      <h3
+                        style={{
+                          fontSize: "19px",
+                          fontWeight: 500,
+                          color: THEME.ink,
+                          margin: 0,
+                        }}
+                      >
+                        {step.title}
+                      </h3>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "14.5px",
+                        lineHeight: 1.5,
+                        color: THEME.slateGray,
+                        margin: 0,
+                      }}
+                    >
+                      {step.desc}
+                    </p>
+                  </div>
                 </div>
-              ))}
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Interactive Score Simulator Preview ─────────────────────────────────────
+function ScorePreviewCalculator() {
+  const [income, setIncome] = useState(75000);
+  const [billsPaid, setBillsPaid] = useState(95);
+  const [existingDebt, setExistingDebt] = useState(15000);
+
+  // Quick heuristic score calculation
+  const dti = (existingDebt / income) * 100;
+  const baseScore = 650 + (income > 50000 ? 50 : 20) + (billsPaid * 1.2) - (dti * 1.5);
+  const score = Math.min(880, Math.max(450, Math.round(baseScore)));
+
+  const getTier = (s: number) => {
+    if (s >= 750) return { label: "Prime (Tier 1)", color: "#16A34A" };
+    if (s >= 650) return { label: "Standard (Tier 2)", color: THEME.lightSignalOrange };
+    return { label: "High Risk (Tier 3)", color: THEME.signalOrange };
+  };
+
+  const tier = getTier(score);
+
+  return (
+    <section
+      style={{
+        padding: "100px 0",
+        background: THEME.lifted,
+        borderTop: `1px solid ${THEME.borderLight}`,
+        borderBottom: `1px solid ${THEME.borderLight}`,
+      }}
+    >
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        <div
+          className="stadium-frame"
+          style={{
+            background: THEME.canvas,
+            border: `1px solid ${THEME.borderLight}`,
+            padding: "52px 44px",
+            boxShadow: "0px 24px 48px rgba(0, 0, 0, 0.05)",
+          }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Column: Form Sliders */}
+            <div className="lg:col-span-7">
+              <div className="eyebrow" style={{ marginBottom: "14px" }}>
+                <span className="eyebrow-dot" />
+                <span>INTERACTIVE SIMULATOR</span>
+              </div>
+              <h2
+                style={{
+                  fontSize: "clamp(28px, 3.5vw, 38px)",
+                  fontWeight: 500,
+                  color: THEME.ink,
+                  marginBottom: "14px",
+                }}
+              >
+                Experience the multi-signal scoring model.
+              </h2>
+              <p
+                style={{
+                  fontSize: "16px",
+                  color: THEME.charcoal,
+                  marginBottom: "36px",
+                }}
+              >
+                Adjust the applicant's variables below to see real-time impact on credit score, risk
+                tier, and loan approval likelihood.
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+                {/* Slider 1: Monthly Income */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label style={{ fontSize: "14px", fontWeight: 600, color: THEME.ink }}>
+                      Monthly Verified Income
+                    </label>
+                    <span
+                      style={{
+                        fontFamily: "'Sofia Sans', sans-serif",
+                        fontSize: "17px",
+                        fontWeight: 700,
+                        color: THEME.ink,
+                      }}
+                    >
+                      INR {income.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={15000}
+                    max={250000}
+                    step={5000}
+                    value={income}
+                    onChange={(e) => setIncome(Number(e.target.value))}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
+                {/* Slider 2: Utility & Bill Payment Punctuality */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label style={{ fontSize: "14px", fontWeight: 600, color: THEME.ink }}>
+                      Utility & Digital Bill Punctuality
+                    </label>
+                    <span
+                      style={{
+                        fontFamily: "'Sofia Sans', sans-serif",
+                        fontSize: "17px",
+                        fontWeight: 700,
+                        color: THEME.ink,
+                      }}
+                    >
+                      {billsPaid}% on-time
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={40}
+                    max={100}
+                    step={1}
+                    value={billsPaid}
+                    onChange={(e) => setBillsPaid(Number(e.target.value))}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
+                {/* Slider 3: Monthly Debt Obligations */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label style={{ fontSize: "14px", fontWeight: 600, color: THEME.ink }}>
+                      Monthly Debt Obligations (EMIs)
+                    </label>
+                    <span
+                      style={{
+                        fontFamily: "'Sofia Sans', sans-serif",
+                        fontSize: "17px",
+                        fontWeight: 700,
+                        color: THEME.ink,
+                      }}
+                    >
+                      INR {existingDebt.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100000}
+                    step={2000}
+                    value={existingDebt}
+                    onChange={(e) => setExistingDebt(Number(e.target.value))}
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Score Outcome Card */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div
+                style={{
+                  backgroundColor: THEME.white,
+                  borderRadius: "36px",
+                  padding: "40px",
+                  width: "100%",
+                  maxWidth: "360px",
+                  boxShadow: "0px 20px 40px rgba(0, 0, 0, 0.08)",
+                  border: `1px solid ${THEME.borderLight}`,
+                  textAlign: "center",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: THEME.slateGray,
+                    marginBottom: "12px",
+                  }}
+                >
+                  Estimated Credit Score
+                </p>
+
+                {/* Score Number Display */}
+                <div
+                  style={{
+                    fontFamily: "'Sofia Sans', sans-serif",
+                    fontSize: "68px",
+                    fontWeight: 700,
+                    color: THEME.ink,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    marginBottom: "8px",
+                  }}
+                >
+                  {score}
+                </div>
+
+                <div
+                  style={{
+                    display: "inline-block",
+                    padding: "6px 18px",
+                    borderRadius: "999px",
+                    backgroundColor: `${tier.color}18`,
+                    color: tier.color,
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    marginBottom: "24px",
+                  }}
+                >
+                  {tier.label}
+                </div>
+
+                <div
+                  style={{
+                    padding: "16px 0",
+                    borderTop: `1px solid ${THEME.borderLight}`,
+                    borderBottom: `1px solid ${THEME.borderLight}`,
+                    marginBottom: "24px",
+                    display: "flex",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: "11px", color: THEME.slateGray, fontWeight: 600 }}>DTI RATIO</p>
+                    <p style={{ fontSize: "16px", fontWeight: 700, color: THEME.ink, marginTop: "2px" }}>
+                      {dti.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: "11px", color: THEME.slateGray, fontWeight: 600 }}>APPROVAL</p>
+                    <p style={{ fontSize: "16px", fontWeight: 700, color: THEME.ink, marginTop: "2px" }}>
+                      {score > 700 ? "94%" : score > 600 ? "76%" : "38%"}
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  to="/assessment"
+                  className="btn-primary"
+                  style={{ width: "100%", padding: "10px 20px" }}
+                >
+                  <span>Full Assessment Flow</span>
+                  <ArrowRight size={15} />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -610,83 +1201,440 @@ function CTA() {
   );
 }
 
-// ─── Footer ──────────────────────────────────────────────────────────────────
-function Footer() {
-  const cols: Record<string, string[]> = {
-    Product: ["Credit Scoring", "Risk Analysis", "Loan Assessment", "AI Insights", "API Documentation"],
-    Company: ["About Us", "Careers", "Blog", "Partners", "Press"],
-    Legal: ["Privacy Policy", "Terms of Service", "Cookie Policy", "Compliance"],
-  };
-
+// ─── CTA Stadium Banner ──────────────────────────────────────────────────────
+function CTAStadium() {
   return (
-    <footer id="contact" style={{ background: "#0B1724", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "64px 24px 40px" }}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
-          <div>
-            <Logo inverted />
-            <p style={{ fontSize: "13.5px", lineHeight: 1.65, color: "rgba(255,255,255,0.45)", margin: "20px 0 24px", maxWidth: "280px" }}>
-              AI-powered credit intelligence that expands financial access while reducing lending risk. Trusted by 200+ institutions globally.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
-              {[
-                ["MailIcon", "contact@credinove.ai"],
-                ["PhoneIcon", "+1 (888) 273-4672"],
-              ].map(([icon, val]) => (
-                <div key={val} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ color: "rgba(255,255,255,0.3)" }}>{icon === "MailIcon" ? <MailIcon /> : <PhoneIcon />}</span>
-                  <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.45)" }}>{val}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[<LinkedInIcon key="li" />, <XIcon key="x" />].map((icon, i) => (
-                <div
-                  key={i}
+    <section style={{ padding: "110px 0", background: THEME.canvas }}>
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        <div
+          className="stadium-frame"
+          style={{
+            backgroundColor: THEME.ink,
+            color: THEME.canvas,
+            padding: "72px 56px",
+            position: "relative",
+            overflow: "hidden",
+            boxShadow: "0px 30px 60px rgba(0, 0, 0, 0.25)",
+          }}
+        >
+          {/* Orbital Decorative Curve inside Dark Stadium */}
+          <svg
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              width: "50%",
+              height: "100%",
+              pointerEvents: "none",
+              opacity: 0.3,
+            }}
+          >
+            <circle
+              cx="400"
+              cy="200"
+              r="280"
+              fill="none"
+              stroke={THEME.lightSignalOrange}
+              strokeWidth="2"
+            />
+          </svg>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+            <div className="lg:col-span-8">
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: THEME.lightSignalOrange,
+                  marginBottom: "16px",
+                }}
+              >
+                <span
                   style={{
-                    width: "34px",
-                    height: "34px",
-                    borderRadius: "6px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "rgba(255,255,255,0.4)",
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    backgroundColor: THEME.lightSignalOrange,
                   }}
-                >
-                  {icon}
-                </div>
-              ))}
+                />
+                TRANSFORM CREDIT UNDERWRITING
+              </div>
+              <h2
+                style={{
+                  fontSize: "clamp(32px, 4vw, 48px)",
+                  fontWeight: 500,
+                  color: "#FFFFFF",
+                  lineHeight: 1.1,
+                  marginBottom: "20px",
+                }}
+              >
+                Ready to deploy next-generation credit intelligence?
+              </h2>
+              <p
+                style={{
+                  fontSize: "17px",
+                  lineHeight: 1.55,
+                  color: "rgba(243, 240, 238, 0.8)",
+                  maxWidth: "600px",
+                }}
+              >
+                Join forward-thinking banks and non-bank lenders using CrediNove AI to approve more
+                qualified borrowers while systematically mitigating portfolio default risk.
+              </p>
+            </div>
+
+            <div
+              className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4 justify-center"
+            >
+              <Link
+                to="/assessment"
+                className="btn-secondary"
+                style={{
+                  padding: "14px 32px",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                }}
+              >
+                <span>Start Assessment</span>
+                <ArrowRight size={18} strokeWidth={2.2} />
+              </Link>
+              <Link
+                to="/judge"
+                className="btn-ghost"
+                style={{
+                  color: "#FFFFFF",
+                  borderColor: "rgba(255, 255, 255, 0.25)",
+                  padding: "14px 28px",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                }}
+              >
+                <Scale size={18} />
+                <span>Open Judge Dashboard</span>
+              </Link>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          {Object.entries(cols).map(([section, items]) => (
-            <div key={section}>
-              <p style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: "0.07em", textTransform: "uppercase", marginBottom: "18px" }}>
-                {section}
-              </p>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                {items.map((item) => (
-                  <li key={item}>
-                    <span style={{ fontSize: "13.5px", color: "rgba(255,255,255,0.45)", cursor: "pointer" }}>
-                      {item}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+// ─── Footer (Mastercard Dark Warm-Black Specification) ────────────────────────
+function Footer() {
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("United States · EN");
+
+  const countries = [
+    "United States · EN",
+    "India · EN / HI",
+    "United Kingdom · EN",
+    "Singapore · EN",
+    "European Union · EN",
+  ];
+
+  return (
+    <footer
+      id="contact"
+      style={{
+        backgroundColor: THEME.ink,
+        color: "#FFFFFF",
+        padding: "100px 0 148px",
+      }}
+    >
+      <div style={{ maxWidth: "1240px", margin: "0 auto", padding: "0 24px" }}>
+        {/* Large Conversational Headline */}
+        <div style={{ marginBottom: "64px" }}>
+          <h2
+            style={{
+              fontFamily: "'Sofia Sans', sans-serif",
+              fontSize: "clamp(32px, 4.5vw, 52px)",
+              fontWeight: 500,
+              color: "#FFFFFF",
+              letterSpacing: "-0.02em",
+              maxWidth: "680px",
+              lineHeight: 1.1,
+            }}
+          >
+            We're always here when you need us.
+          </h2>
         </div>
 
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
-          <p style={{ fontSize: "12.5px", color: "rgba(255,255,255,0.3)" }}>
-            © 2026 CrediNove AI, Inc. All rights reserved.
-          </p>
-          <div style={{ display: "flex", gap: "12px" }}>
-            {["SOC 2", "ISO 27001", "GDPR", "RBI / Basel III Ready"].map((cert) => (
-              <span key={cert} style={{ fontSize: "11px", fontWeight: 600, color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px", padding: "3px 8px" }}>
-                {cert}
-              </span>
-            ))}
+        {/* 4-Column Link Grid */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12"
+          style={{ marginBottom: "80px" }}
+        >
+          {/* Column 1: Solutions */}
+          <div>
+            <p
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: THEME.dustTaupe,
+                marginBottom: "20px",
+              }}
+            >
+              SOLUTIONS
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "14px" }}>
+              {[
+                { name: "Credit Scoring Engine", link: "/assessment" },
+                { name: "Alternative Data Ingestion", link: "/assessment" },
+                { name: "Explainable AI (SHAP)", link: "/judge" },
+                { name: "Demographic Fair Lending", link: "/judge" },
+                { name: "API Documentation", link: "/judge", ext: true },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link
+                    to={item.link}
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: "14.5px",
+                      fontWeight: 450,
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      opacity: 0.9,
+                    }}
+                  >
+                    {item.name}
+                    {item.ext && <ArrowUpRight size={13} opacity={0.7} />}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 2: Institutions */}
+          <div>
+            <p
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: THEME.dustTaupe,
+                marginBottom: "20px",
+              }}
+            >
+              FOR INSTITUTIONS
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "14px" }}>
+              {[
+                { name: "Commercial Banks", link: "/assessment" },
+                { name: "Microfinance & NBFCs", link: "/assessment" },
+                { name: "Fintech Underwriters", link: "/assessment" },
+                { name: "Model Governance Audits", link: "/judge" },
+                { name: "Enterprise Security SLA", link: "/judge" },
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link
+                    to={item.link}
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: "14.5px",
+                      fontWeight: 450,
+                      textDecoration: "none",
+                      opacity: 0.9,
+                    }}
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Need Help (with Lucide icons) */}
+          <div>
+            <p
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: THEME.dustTaupe,
+                marginBottom: "20px",
+              }}
+            >
+              NEED HELP?
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "14px" }}>
+              {[
+                { name: "Customer Support Desk", icon: HelpCircle, link: "/assessment" },
+                { name: "Report Lost Card / Security", icon: CreditCard, link: "/assessment" },
+                { name: "Global Branch Locator", icon: MapPin, link: "/" },
+                { name: "Compliance & RBI Inquiries", icon: Mail, link: "/judge" },
+              ].map((item) => {
+                const IconComp = item.icon;
+                return (
+                  <li key={item.name}>
+                    <Link
+                      to={item.link}
+                      style={{
+                        color: "#FFFFFF",
+                        fontSize: "14.5px",
+                        fontWeight: 450,
+                        textDecoration: "none",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        opacity: 0.9,
+                      }}
+                    >
+                      <IconComp size={15} color={THEME.lightSignalOrange} />
+                      {item.name}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* Column 4: Brand & Socials */}
+          <div>
+            <div style={{ marginBottom: "20px" }}>
+              <Logo inverted />
+            </div>
+            <p
+              style={{
+                fontSize: "14px",
+                lineHeight: 1.6,
+                color: "rgba(255, 255, 255, 0.7)",
+                marginBottom: "24px",
+              }}
+            >
+              CrediNove AI is an enterprise financial intelligence platform pioneering fair,
+              transparent, and high-accuracy credit assessment.
+            </p>
+
+            {/* Social Icons (Lucide) */}
+            <div style={{ display: "flex", gap: "12px" }}>
+              {[
+                { icon: Linkedin, label: "LinkedIn" },
+                { icon: Twitter, label: "X" },
+                { icon: Facebook, label: "Facebook" },
+                { icon: Youtube, label: "YouTube" },
+              ].map((s) => {
+                const SocialIcon = s.icon;
+                return (
+                  <a
+                    key={s.label}
+                    href="#contact"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.08)",
+                      border: "1px solid rgba(255, 255, 255, 0.15)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#FFFFFF",
+                      transition: "background 0.2s ease",
+                    }}
+                    aria-label={s.label}
+                  >
+                    <SocialIcon size={17} />
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* 1px White-at-opacity Divider */}
+        <div
+          style={{
+            width: "100%",
+            height: "1px",
+            backgroundColor: "rgba(255, 255, 255, 0.15)",
+            marginBottom: "36px",
+          }}
+        />
+
+        {/* Bottom Row */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex flex-wrap items-center gap-6 text-sm" style={{ color: "rgba(255, 255, 255, 0.6)" }}>
+            <span>© 2026 CrediNove AI, Inc. All rights reserved.</span>
+            <a href="#contact" style={{ color: "inherit", textDecoration: "none" }}>
+              Privacy Policy
+            </a>
+            <a href="#contact" style={{ color: "inherit", textDecoration: "none" }}>
+              Terms of Use
+            </a>
+            <a href="#contact" style={{ color: "inherit", textDecoration: "none" }}>
+              Regulatory Disclosures
+            </a>
+          </div>
+
+          {/* Country / Language Pill Selector */}
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setCountryOpen(!countryOpen)}
+              style={{
+                backgroundColor: THEME.ink,
+                color: "#FFFFFF",
+                border: "1px solid rgba(255, 255, 255, 0.4)",
+                borderRadius: "999px",
+                padding: "8px 18px",
+                fontSize: "13.5px",
+                fontWeight: 500,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+              }}
+            >
+              <Globe size={15} color={THEME.lightSignalOrange} />
+              <span>{selectedCountry}</span>
+              <ChevronDown size={14} />
+            </button>
+
+            {countryOpen && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "48px",
+                  right: 0,
+                  backgroundColor: THEME.charcoal,
+                  borderRadius: "16px",
+                  padding: "8px 0",
+                  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.4)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  minWidth: "200px",
+                  zIndex: 50,
+                }}
+              >
+                {countries.map((c) => (
+                  <div
+                    key={c}
+                    onClick={() => {
+                      setSelectedCountry(c);
+                      setCountryOpen(false);
+                    }}
+                    style={{
+                      padding: "8px 16px",
+                      fontSize: "13px",
+                      color: "#FFFFFF",
+                      cursor: "pointer",
+                      backgroundColor: c === selectedCountry ? "rgba(255,255,255,0.1)" : "transparent",
+                    }}
+                  >
+                    {c}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -697,16 +1645,16 @@ function Footer() {
 // ─── Main Landing Page ───────────────────────────────────────────────────────
 export default function LandingPage() {
   return (
-    <div style={{ minHeight: "100%", background: C.white }}>
+    <div style={{ minHeight: "100%", backgroundColor: THEME.canvas }}>
       <AnnouncementBar />
       <Navbar />
       <main>
         <Hero />
-        <Features />
-        <FinancialInclusion />
+        <ConstellationServices />
+        <PillCarouselSection />
         <HowItWorks />
-        <Services />
-        <CTA />
+        <ScorePreviewCalculator />
+        <CTAStadium />
       </main>
       <Footer />
     </div>

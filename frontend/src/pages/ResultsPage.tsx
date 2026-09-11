@@ -217,11 +217,9 @@ function CustomTooltip({ active, payload, label }: any) {
 // ── Main Results Page ───────────────────────────────────────────────────────
 export default function ResultsPage() {
   const navigate = useNavigate();
-  const { result, personal, financial, transaction, payment, dti, resetAssessment } =
-    useAssessment();
+  const { result, formData, resetAssessment } = useAssessment();
 
-  const activeResult =
-    result || calculateCreditScore(personal, financial, transaction, payment, dti);
+  const activeResult = result || calculateCreditScore(formData);
 
   const scoreBands = [
     { label: "Exceptional", range: "850–1000", color: "#16A34A" },
@@ -267,7 +265,9 @@ export default function ResultsPage() {
                 margin: 0,
               }}
             >
-              {personal.fullName || "Rahul Sharma"}
+              {formData.SK_ID_CURR
+              ? `Applicant #${formData.SK_ID_CURR}`
+              : "Credit Assessment"}
             </h1>
             <p style={{ fontSize: "14px", color: THEME.charcoal, marginTop: "6px" }}>
               Applicant ID:{" "}
@@ -668,7 +668,7 @@ export default function ResultsPage() {
             >
               <p style={{ fontSize: "12.5px", color: THEME.charcoal, margin: 0, lineHeight: 1.5 }}>
                 Score of <strong style={{ color: THEME.ink }}>{activeResult.creditScore}</strong>{" "}
-                places {personal.fullName || "applicant"} in the{" "}
+                places {formData.SK_ID_CURR ? `Applicant #${formData.SK_ID_CURR}` : "this applicant"} in the{" "}
                 <strong>{activeResult.scoreBand}</strong> tier, qualifying for standard institutional
                 lending rates.
               </p>

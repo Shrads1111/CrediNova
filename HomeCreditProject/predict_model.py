@@ -208,12 +208,14 @@ class HomeCreditPredictor:
                 f"found {len(model_paths)}."
             )
 
-        self.models = [
-            lgb.Booster(
-                model_file=path
+        # Normalize CRLF→LF: Windows checkouts break LightGBM's text model parser.
+        self.models = []
+        for path in model_paths:
+            with open(path, "rb") as model_file:
+                raw = model_file.read().replace(b"\r\n", b"\n")
+            self.models.append(
+                lgb.Booster(model_str=raw.decode("utf-8"))
             )
-            for path in model_paths
-        ]
 
         # ----------------------------------------------------
         # Safety check

@@ -352,52 +352,27 @@ class HomeCreditPredictor:
         )
 
         # ----------------------------------------------------
-        # Explain using all 10 models
+        # ----------------------------------------------------
+        # Explain using all 10 models (fast native pred_contrib)
         # ----------------------------------------------------
 
-        for model in self.models:
-
-            explainer = (
-                shap.TreeExplainer(
-                    model
-                )
-            )
-
-            values = (
-                explainer.shap_values(
-                    X_row
-                )
-            )
-
-            # SHAP versions may return
-            # either a list or ndarray.
-
-            if isinstance(
-                values,
-                list
-            ):
-
-                values = values[1]
-
-            values = np.asarray(
-                values
-            )
-
-            # Handle possible 3D output
-            if values.ndim == 3:
-
-                values = values[
-                    :,
-                    :,
-                    1
-                ]
-
-            total += values[0]
+        try:
+            for model in self.models:
+                contrib = model.predict(X_row, pred_contrib=True)
+                total += contrib[0, :len(self.feature_columns)]
+        except Exception:
+            for model in self.models:
+                explainer = shap.TreeExplainer(model)
+                values = explainer.shap_values(X_row)
+                if isinstance(values, list):
+                    values = values[1]
+                values = np.asarray(values)
+                if values.ndim == 3:
+                    values = values[:, :, 1]
+                total += values[0]
 
         # Average across 10 models
-        total /= len(
-            self.models
-        )
+        total /= len(self.models)
 
         # ----------------------------------------------------
         # Select strongest features

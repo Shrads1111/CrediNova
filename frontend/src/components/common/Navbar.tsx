@@ -59,7 +59,7 @@ export function Logo({ inverted }: { inverted?: boolean }) {
             lineHeight: 1,
           }}
         >
-          CrediNove
+          CrediNova
         </span>
       </div>
     </Link>
@@ -259,7 +259,7 @@ export function Navbar() {
                 cursor: "pointer",
                 transition: "all 0.2s ease",
               }}
-              title="Search CrediNove platform"
+              title="Search CrediNova platform"
               aria-label="Toggle search"
             >
               <Search size={17} strokeWidth={2} />

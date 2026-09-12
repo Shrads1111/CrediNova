@@ -48,7 +48,7 @@ def init_database(settings: Optional[Settings] = None) -> str:
                 settings.supabase_service_role_key,
             )
             # Lightweight connectivity probe
-            _client.table("demo_applicants").select("sk_id_curr").limit(1).execute()
+            _client.table("demo_applicants").select("SK_ID_CURR").limit(1).execute()
             _mode = "supabase"
             _mode_detail = "connected"
             logger.info("Supabase client connected")
@@ -123,22 +123,46 @@ def list_applicants(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
             for col in summary_cols:
                 if col in row.index:
                     val = row[col]
-                    item[col] = None if pd.isna(val) else (
-                        int(val) if col == "sk_id_curr" else float(val)
-                        if isinstance(val, (int, float)) else val
-                    )
+                    if pd.isna(val):
+                        item[col] = None
+                    elif col == "sk_id_curr":
+                        item[col] = int(val)
+                    elif col.startswith("days_") and isinstance(val, (int, float)):
+                        item[col] = abs(float(val))
+                    elif isinstance(val, (int, float)):
+                        item[col] = float(val)
+                    else:
+                        item[col] = val
             rows.append(item)
         return rows
 
-    select_cols = ",".join(summary_cols)
+    # Query Supabase demo_applicants (columns are uppercase in PostgreSQL)
     response = (
         get_supabase()
         .table("demo_applicants")
-        .select(select_cols)
+        .select("*")
         .range(offset, offset + limit - 1)
         .execute()
     )
-    return response.data or []
+    raw_rows = response.data or []
+    rows: List[Dict[str, Any]] = []
+    for r in raw_rows:
+        item: Dict[str, Any] = {}
+        for col in summary_cols:
+            val = r.get(col) if col in r else r.get(col.upper())
+            if val is not None:
+                if col == "sk_id_curr":
+                    item[col] = int(val)
+                elif col.startswith("days_") and isinstance(val, (int, float)):
+                    item[col] = abs(float(val))
+                elif isinstance(val, (int, float)):
+                    item[col] = float(val)
+                else:
+                    item[col] = val
+            else:
+                item[col] = None
+        rows.append(item)
+    return rows
 
 
 def get_applicant(applicant_id: int) -> Optional[Dict[str, Any]]:
@@ -151,18 +175,46 @@ def get_applicant(applicant_id: int) -> Optional[Dict[str, Any]]:
             return None
         row = matches.iloc[0].where(pd.notnull(matches.iloc[0]), None).to_dict()
         row["sk_id_curr"] = int(row["sk_id_curr"])
+        # Ensure any days_* fields are positive
+        for k in list(row.keys()):
+            if k.lower().startswith("days_") and isinstance(row[k], (int, float)):
+                row[k] = abs(row[k])
         return row
 
-    response = (
-        get_supabase()
-        .table("demo_applicants")
-        .select("*")
-        .eq("sk_id_curr", int(applicant_id))
-        .limit(1)
-        .execute()
-    )
+    # Try querying with uppercase SK_ID_CURR then lowercase sk_id_curr
+    try:
+        response = (
+            get_supabase()
+            .table("demo_applicants")
+            .select("*")
+            .eq("SK_ID_CURR", int(applicant_id))
+            .limit(1)
+            .execute()
+        )
+    except Exception:
+        response = (
+            get_supabase()
+            .table("demo_applicants")
+            .select("*")
+            .eq("sk_id_curr", int(applicant_id))
+            .limit(1)
+            .execute()
+        )
+
     data = response.data or []
-    return data[0] if data else None
+    if not data:
+        return None
+    raw = data[0]
+    # Normalize row to include both lowercase and uppercase keys
+    normalized: Dict[str, Any] = {}
+    for k, v in raw.items():
+        val = v
+        if k.lower().startswith("days_") and isinstance(v, (int, float)):
+            val = abs(v)
+        normalized[k.lower()] = val
+        normalized[k] = val
+    normalized["sk_id_curr"] = int(normalized.get("sk_id_curr") or normalized.get("SK_ID_CURR", applicant_id))
+    return normalized
 
 
 def create_assessment(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -263,6 +315,44 @@ def create_prediction(payload: Dict[str, Any]) -> Dict[str, Any]:
     if not data:
         raise RuntimeError("Failed to create prediction in Supabase")
     return data[0]
+
+
+def list_assessments(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
+    limit = max(1, min(limit, 100))
+    offset = max(0, offset)
+
+    if is_offline():
+        items = list(_offline_assessments.values())
+        return items[offset : offset + limit]
+
+    response = (
+        get_supabase()
+        .table("assessments")
+        .select("*")
+        .order("created_at", desc=True)
+        .range(offset, offset + limit - 1)
+        .execute()
+    )
+    return response.data or []
+
+
+def list_predictions(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
+    limit = max(1, min(limit, 100))
+    offset = max(0, offset)
+
+    if is_offline():
+        items = list(_offline_predictions.values())
+        return items[offset : offset + limit]
+
+    response = (
+        get_supabase()
+        .table("predictions")
+        .select("*")
+        .order("created_at", desc=True)
+        .range(offset, offset + limit - 1)
+        .execute()
+    )
+    return response.data or []
 
 
 def reset_offline_stores() -> None:

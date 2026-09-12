@@ -163,7 +163,7 @@ function Hero() {
                 marginBottom: "36px",
               }}
             >
-              CrediNove AI combines traditional bureau history with alternative digital signals —
+              CrediNova AI combines traditional bureau history with alternative digital signals —
               utility punctuality, cash flow velocity, and digital transaction behavior — to deliver
               accurate, fair, and explainable credit assessments.
             </p>
@@ -1283,7 +1283,7 @@ function CTAStadium() {
                   maxWidth: "600px",
                 }}
               >
-                Join forward-thinking banks and non-bank lenders using CrediNove AI to approve more
+                Join forward-thinking banks and non-bank lenders using CrediNova AI to approve more
                 qualified borrowers while systematically mitigating portfolio default risk.
               </p>
             </div>
@@ -1513,7 +1513,7 @@ function Footer() {
                 marginBottom: "24px",
               }}
             >
-              CrediNove AI is an enterprise financial intelligence platform pioneering fair,
+              CrediNova AI is an enterprise financial intelligence platform pioneering fair,
               transparent, and high-accuracy credit assessment.
             </p>
 
@@ -1565,7 +1565,7 @@ function Footer() {
         {/* Bottom Row */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex flex-wrap items-center gap-6 text-sm" style={{ color: "rgba(255, 255, 255, 0.6)" }}>
-            <span>© 2026 CrediNove AI, Inc. All rights reserved.</span>
+            <span>© 2026 CrediNova AI, Inc. All rights reserved.</span>
             <a href="#contact" style={{ color: "inherit", textDecoration: "none" }}>
               Privacy Policy
             </a>

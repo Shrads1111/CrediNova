@@ -87,8 +87,8 @@ export const DEMO_APPLICANT: ApplicantFormData = {
   NAME_EDUCATION_TYPE: "Secondary / secondary special",
   NAME_FAMILY_STATUS: "Married",
   NAME_HOUSING_TYPE: "House / apartment",
-  DAYS_BIRTH: "-19241",
-  DAYS_EMPLOYED: "-3036",
+  DAYS_BIRTH: "19241",
+  DAYS_EMPLOYED: "3036",
   OCCUPATION_TYPE: "Laborers",
   ORGANIZATION_TYPE: "Business Entity Type 3",
   EXT_SOURCE_1: "0.7524",
@@ -280,4 +280,15 @@ export interface AssessmentResult {
   suggestions: SuggestionItem[];
   /** Snapshot of the editable form data at submission time. */
   rawApplicant: ApplicantFormData;
+  /** Supabase audit metadata */
+  assessmentId?: string;
+  predictionId?: string;
+  modelVersion?: string;
+  isMlPrediction?: boolean;
+  shapSummary?: Array<{
+    feature: string;
+    impact?: number | null;
+    direction?: string | null;
+    error?: string | null;
+  }> | null;
 }

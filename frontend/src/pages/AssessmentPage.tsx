@@ -402,58 +402,42 @@ function ProgressBar({
 
 // ─── Step 0: Applicant Lookup ─────────────────────────────────────────────────
 function StepLookup() {
-  const { lookupId, setLookupId, loadApplicant, loadDemoApplicant, errors } = useAssessment();
+  const {
+    lookupId,
+    setLookupId,
+    loadApplicantById,
+    loadDemoApplicant,
+    isLoadingApplicant,
+    lookupError,
+    errors,
+  } = useAssessment();
 
-  // When the user manually confirms the ID, we create a skeleton record so they
-  // can proceed to fill in the remaining fields.  The backend will replace this
-  // with a real fetch later — the architecture is ready for that.
-  const handleConfirmId = () => {
-    if (!lookupId.trim()) return;
-    // Build a skeleton: only SK_ID_CURR is known; all other fields blank.
-    // Future: replace this block with an API call that returns the full record.
-    const skeleton: ApplicantFormData = {
-      SK_ID_CURR: lookupId.trim(),
-      NAME_CONTRACT_TYPE: "",
-      AMT_INCOME_TOTAL: "",
-      AMT_CREDIT: "",
-      AMT_ANNUITY: "",
-      AMT_GOODS_PRICE: "",
-      CODE_GENDER: "",
-      FLAG_OWN_CAR: "",
-      NAME_INCOME_TYPE: "",
-      NAME_EDUCATION_TYPE: "",
-      NAME_FAMILY_STATUS: "",
-      NAME_HOUSING_TYPE: "",
-      DAYS_BIRTH: "",
-      DAYS_EMPLOYED: "",
-      OCCUPATION_TYPE: "",
-      ORGANIZATION_TYPE: "",
-      EXT_SOURCE_1: "",
-      EXT_SOURCE_2: "",
-      EXT_SOURCE_3: "",
-      DEF_30_CNT_SOCIAL_CIRCLE: "",
-      DEF_60_CNT_SOCIAL_CIRCLE: "",
-      AMT_REQ_CREDIT_BUREAU_QRT: "",
-      REGION_RATING_CLIENT: "",
-      REGION_RATING_CLIENT_W_CITY: "",
-      REGION_POPULATION_RELATIVE: "",
-    };
-    loadApplicant(skeleton);
+  const sampleApplicants = [
+    { id: "100001", label: "Applicant #100001 (Prime / Low Risk)" },
+    { id: "100005", label: "Applicant #100005 (Standard Loan)" },
+    { id: "100013", label: "Applicant #100013 (High Credit Tier)" },
+    { id: "100028", label: "Applicant #100028 (Thin-File Inclusion)" },
+  ];
+
+  const handleConfirmId = async (idToLoad?: string) => {
+    const target = idToLoad ?? lookupId;
+    if (!target.trim()) return;
+    await loadApplicantById(target.trim());
   };
 
   return (
     <div className="animate-fade-in">
       <SectionCard
-        title="Applicant Lookup"
-        subtitle="Enter the Applicant ID (SK_ID_CURR) to load the applicant record. The system will retrieve all associated fields automatically once connected to the backend."
+        title="Applicant Lookup & Ingestion"
+        subtitle="Retrieve benchmark applicant data from the Supabase demo_applicants table to populate the credit evaluation parameters."
       >
         {/* ID input */}
-        <div style={{ maxWidth: "480px" }}>
+        <div style={{ maxWidth: "560px" }}>
           <FormField
             label={fl("SK_ID_CURR")}
             required
-            error={errors.lookupId}
-            hint="Dataset identifier (SK_ID_CURR)"
+            error={errors.lookupId || lookupError || undefined}
+            hint="Database benchmark identifier (SK_ID_CURR)"
           >
             <div style={{ display: "flex", gap: "12px" }}>
               <input
@@ -461,20 +445,100 @@ function StepLookup() {
                 value={lookupId}
                 onChange={(e) => setLookupId(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleConfirmId()}
-                placeholder="e.g. 100001"
+                placeholder="e.g. 100001, 100005, 100013..."
                 style={inputStyle}
                 autoFocus
+                disabled={isLoadingApplicant}
               />
               <button
-                onClick={handleConfirmId}
+                onClick={() => handleConfirmId()}
+                disabled={isLoadingApplicant}
                 className="btn-primary"
-                style={{ padding: "11px 22px", flexShrink: 0 }}
+                style={{
+                  padding: "11px 24px",
+                  flexShrink: 0,
+                  opacity: isLoadingApplicant ? 0.7 : 1,
+                }}
               >
-                <Search size={16} />
-                <span>Load</span>
+                {isLoadingApplicant ? (
+                  <span className="flex items-center gap-2">
+                    <span
+                      style={{
+                        width: "14px",
+                        height: "14px",
+                        border: "2px solid #FFFFFF",
+                        borderTopColor: "transparent",
+                        borderRadius: "50%",
+                        animation: "spin 1s linear infinite",
+                        display: "inline-block",
+                      }}
+                    />
+                    <span>Loading...</span>
+                  </span>
+                ) : (
+                  <>
+                    <Search size={16} />
+                    <span>Load Record</span>
+                  </>
+                )}
               </button>
             </div>
           </FormField>
+        </div>
+
+        {/* Quick sample chips */}
+        <div style={{ marginTop: "16px", marginBottom: "24px" }}>
+          <p
+            style={{
+              fontSize: "12.5px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: THEME.slateGray,
+              marginBottom: "10px",
+            }}
+          >
+            Quick Benchmarks from demo_applicants table:
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            {sampleApplicants.map((samp) => (
+              <button
+                key={samp.id}
+                onClick={() => {
+                  setLookupId(samp.id);
+                  handleConfirmId(samp.id);
+                }}
+                disabled={isLoadingApplicant}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "999px",
+                  border: `1.5px solid ${
+                    lookupId === samp.id ? THEME.ink : THEME.borderLight
+                  }`,
+                  backgroundColor:
+                    lookupId === samp.id ? THEME.ink : THEME.white,
+                  color: lookupId === samp.id ? "#FFFFFF" : THEME.ink,
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <Sparkles
+                  size={13}
+                  color={
+                    lookupId === samp.id
+                      ? THEME.lightSignalOrange
+                      : THEME.signalOrange
+                  }
+                />
+                <span>{samp.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Info notice */}
@@ -488,15 +552,14 @@ function StepLookup() {
             fontSize: "13.5px",
             color: THEME.charcoal,
             lineHeight: 1.6,
-            maxWidth: "600px",
+            maxWidth: "640px",
           }}
         >
           <p style={{ margin: 0 }}>
-            <strong style={{ color: THEME.ink }}>How it works:</strong> Once a backend
-            connection is established, entering a valid Applicant ID will automatically
-            populate all 25 fields from the dataset. For now, use{" "}
-            <strong>Pre-fill Demo Applicant</strong> in the header to load applicant{" "}
-            <strong>100001</strong> and explore the full form.
+            <strong style={{ color: THEME.ink }}>Live Supabase Connection:</strong>{" "}
+            Clicking any applicant above or entering an ID queries the live{" "}
+            <code>demo_applicants</code> table in Supabase. All 25 form fields are
+            auto-populated so you can review them and proceed to the AI credit evaluation.
           </p>
         </div>
       </SectionCard>
@@ -770,7 +833,7 @@ function StepApplicant() {
 
       <SectionCard
         title="Employment Information"
-        subtitle="Age and employment duration are stored in the dataset as negative day counts relative to the application date."
+        subtitle="Age and employment duration in days relative to the application date."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
 
@@ -779,14 +842,15 @@ function StepApplicant() {
             label={fl("DAYS_BIRTH")}
             required
             error={errors.DAYS_BIRTH}
-            hint={daysToAge(formData.DAYS_BIRTH) || "e.g. −19241 days"}
+            hint={daysToAge(formData.DAYS_BIRTH) || "e.g. 19241 days"}
           >
             <input
               type="number"
               value={formData.DAYS_BIRTH}
               onChange={(e) => update("DAYS_BIRTH", e.target.value)}
-              placeholder="e.g. -19241"
+              placeholder="e.g. 19241"
               style={inputStyle}
+              min="0"
               step="1"
             />
           </FormField>
@@ -795,14 +859,15 @@ function StepApplicant() {
           <FormField
             label={fl("DAYS_EMPLOYED")}
             error={errors.DAYS_EMPLOYED}
-            hint={daysToEmployment(formData.DAYS_EMPLOYED) || "e.g. −3036 days"}
+            hint={daysToEmployment(formData.DAYS_EMPLOYED) || "e.g. 3036 days"}
           >
             <input
               type="number"
               value={formData.DAYS_EMPLOYED}
               onChange={(e) => update("DAYS_EMPLOYED", e.target.value)}
-              placeholder="e.g. -3036"
+              placeholder="e.g. 3036"
               style={inputStyle}
+              min="0"
               step="1"
             />
           </FormField>
@@ -1623,6 +1688,7 @@ export default function AssessmentPage() {
     saveDraft,
     savedDraftToast,
     generateScore,
+    submitAndScore,
     isAnalyzing,
     setIsAnalyzing,
   } = useAssessment();
@@ -1631,16 +1697,23 @@ export default function AssessmentPage() {
     "Calibrating external risk indicators..."
   );
 
-  const handleGenerateScore = () => {
+  const handleGenerateScore = async () => {
     setIsAnalyzing(true);
-    setLoadingStepText("Processing financial & loan parameters...");
-    setTimeout(() => setLoadingStepText("Evaluating applicant risk profile..."), 600);
-    setTimeout(() => setLoadingStepText("Computing credit score & SHAP factor contributions..."), 1200);
-    setTimeout(() => {
-      generateScore();
-      setIsAnalyzing(false);
-      navigate("/assessment/results");
-    }, 1800);
+    setLoadingStepText("Persisting applicant dossier to Supabase assessments table...");
+    setTimeout(() => setLoadingStepText("Evaluating applicant features with 10-fold LightGBM ensemble..."), 600);
+    setTimeout(() => setLoadingStepText("Computing tree SHAP factor attributions..."), 1200);
+    setTimeout(() => setLoadingStepText("Persisting audit log to Supabase predictions table..."), 1800);
+
+    try {
+      await submitAndScore();
+    } catch (e) {
+      console.error("Score generation error:", e);
+    } finally {
+      setTimeout(() => {
+        setIsAnalyzing(false);
+        navigate("/assessment/results");
+      }, 2100);
+    }
   };
 
   return (

@@ -273,11 +273,50 @@ export default function ResultsPage() {
               Applicant ID:{" "}
               <strong style={{ color: THEME.ink }}>{activeResult.applicantId}</strong>
               <span style={{ margin: "0 10px", color: THEME.borderLight }}>|</span>
-              Model Version:{" "}
-              <strong style={{ color: THEME.signalOrange }}>Ensemble XGB-NN v3.2.1</strong>
+              Model:{" "}
+              <strong style={{ color: THEME.signalOrange }}>
+                {activeResult.modelVersion || "LightGBM 10-Fold Ensemble v1"}
+              </strong>
               <span style={{ margin: "0 10px", color: THEME.borderLight }}>|</span>
-              Jurisdiction: <strong>RBI / Basel III Calibrated</strong>
+              Status:{" "}
+              <strong style={{ color: "#16A34A" }}>
+                {activeResult.isMlPrediction ? "Live AI Inference Active" : "Calibrated Engine"}
+              </strong>
             </p>
+
+            {/* Supabase Audit Badge */}
+            <div
+              style={{
+                marginTop: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "6px 14px",
+                borderRadius: "999px",
+                backgroundColor: "rgba(22, 163, 74, 0.08)",
+                border: "1px solid rgba(22, 163, 74, 0.25)",
+                fontSize: "12px",
+                color: THEME.ink,
+              }}
+            >
+              <span
+                style={{
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  backgroundColor: "#16A34A",
+                  display: "inline-block",
+                }}
+              />
+              <span>
+                <strong>Supabase Audit:</strong>{" "}
+                Assessment ID:{" "}
+                <code>{activeResult.assessmentId ? activeResult.assessmentId.slice(0, 8) + "..." : "Ingested"}</code>
+                {" · "}
+                Prediction ID:{" "}
+                <code>{activeResult.predictionId ? activeResult.predictionId.slice(0, 8) + "..." : "Ingested"}</code>
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

@@ -1,14 +1,38 @@
 """ML prediction endpoints."""
 
-from __future__ import annotations
-
-from fastapi import APIRouter, HTTPException
+from typing import List
+from fastapi import APIRouter, HTTPException, Query
 
 from app import database as db
 from app.schemas.prediction import PredictionRequest, PredictionResponse
 from app.services.ml_service import get_ml_service
 
 router = APIRouter(prefix="/api", tags=["prediction"])
+
+
+@router.get("/predictions", response_model=List[PredictionResponse])
+def list_predictions(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+) -> List[PredictionResponse]:
+    rows = db.list_predictions(limit=limit, offset=offset)
+    return [
+        PredictionResponse(
+            id=row.get("id"),
+            assessment_id=row.get("assessment_id"),
+            applicant_id=int(row["applicant_id"]),
+            default_probability=float(row["default_probability"]),
+            default_probability_percent=float(row["default_probability_percent"]),
+            credit_score=int(row["credit_score"]),
+            score_scale=row.get("score_scale", "300-900"),
+            risk_band=row["risk_band"],
+            model_version=row["model_version"],
+            shap_summary=row.get("shap_summary"),
+            created_at=row.get("created_at"),
+            source="ml_ensemble",
+        )
+        for row in rows
+    ]
 
 
 @router.post("/predict", response_model=PredictionResponse)

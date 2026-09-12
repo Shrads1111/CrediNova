@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   AreaChart,
@@ -31,8 +31,16 @@ import {
   ArrowLeft,
   X,
   Layers,
+  Database,
+  RefreshCw,
 } from "lucide-react";
 import { Navbar } from "../components/common/Navbar";
+import {
+  fetchRecentAssessments,
+  fetchRecentPredictions,
+  AssessmentRecordData,
+  PredictionRecordData,
+} from "../services/supabaseService";
 
 const THEME = {
   canvas: "#F3F0EE",
@@ -664,7 +672,7 @@ function AltDataImpact() {
             Alternative Data Lift Analysis
           </h2>
           <p style={{ color: THEME.slateGray, fontSize: "14.5px", margin: "6px 0 0" }}>
-            Side-by-side performance: traditional bureau model vs. CrediNove multi-signal engine
+            Side-by-side performance: traditional bureau model vs. CrediNova multi-signal engine
           </p>
         </div>
         <div
@@ -916,7 +924,7 @@ function FairnessAudit() {
             Demographic Subgroup Acceptance Parity
           </h2>
           <p style={{ color: THEME.slateGray, fontSize: "14.5px", margin: "6px 0 0" }}>
-            Acceptance rate across age bands and geography · Traditional baseline vs. CrediNove model
+            Acceptance rate across age bands and geography · Traditional baseline vs. CrediNova model
           </p>
         </div>
         <div className="flex flex-col gap-2">
@@ -997,7 +1005,7 @@ function FairnessAudit() {
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <div style={{ width: "12px", height: "12px", backgroundColor: THEME.ink, borderRadius: "50%" }} />
           <span style={{ fontSize: "12px", color: THEME.ink, fontWeight: 600 }}>
-            Traditional + Alternative Data (CrediNove)
+            Traditional + Alternative Data (CrediNova)
           </span>
         </div>
       </div>
@@ -1086,6 +1094,406 @@ function CalloutPanel({
   );
 }
 
+function SupabaseLiveAudit() {
+  const [assessments, setAssessments] = useState<AssessmentRecordData[]>([]);
+  const [predictions, setPredictions] = useState<PredictionRecordData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"predictions" | "assessments">("predictions");
+
+  const loadAuditData = async () => {
+    setLoading(true);
+    try {
+      const [ass, preds] = await Promise.all([
+        fetchRecentAssessments(10),
+        fetchRecentPredictions(10),
+      ]);
+      setAssessments(ass);
+      setPredictions(preds);
+    } catch (err) {
+      console.warn("Failed to load audit data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAuditData();
+  }, []);
+
+  return (
+    <div
+      style={{
+        backgroundColor: THEME.lifted,
+        borderRadius: "32px",
+        border: `1px solid ${THEME.borderLight}`,
+        padding: "36px",
+        marginBottom: "36px",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.03)",
+      }}
+    >
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <div className="eyebrow" style={{ marginBottom: "8px" }}>
+            <span className="eyebrow-dot" />
+            <span>POSTGRESQL AUDIT TRAIL · LIVE TELEMETRY</span>
+          </div>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: 500,
+              color: THEME.ink,
+              margin: 0,
+            }}
+          >
+            Supabase Live Database Operations
+          </h2>
+          <p style={{ fontSize: "14px", color: THEME.slateGray, margin: "4px 0 0" }}>
+            Real-time audit log of submissions, ML inferences, and benchmark applicants across the 3 core tables.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "6px 14px",
+              borderRadius: "999px",
+              backgroundColor: "rgba(22, 163, 74, 0.1)",
+              border: "1px solid rgba(22, 163, 74, 0.25)",
+              fontSize: "12.5px",
+              color: "#16A34A",
+              fontWeight: 600,
+            }}
+          >
+            <span
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: "#16A34A",
+              }}
+            />
+            <span>Supabase Connected</span>
+          </div>
+          <button
+            onClick={loadAuditData}
+            disabled={loading}
+            className="btn-secondary"
+            style={{ padding: "8px 16px", fontSize: "13px" }}
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 3 Table KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div
+          style={{
+            backgroundColor: THEME.white,
+            borderRadius: "20px",
+            border: `1px solid ${THEME.borderLight}`,
+            padding: "20px",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                backgroundColor: "rgba(207, 69, 0, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Database size={18} color={THEME.signalOrange} />
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: THEME.slateGray, textTransform: "uppercase" }}>
+                TABLE 1
+              </p>
+              <h4 style={{ fontSize: "15px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+                demo_applicants
+              </h4>
+            </div>
+          </div>
+          <div className="mt-3">
+            <span style={{ fontSize: "28px", fontWeight: 700, color: THEME.ink }}>1,000+</span>
+            <p style={{ fontSize: "12px", color: THEME.slateGray, margin: "2px 0 0" }}>
+              Pre-computed Home Credit records · 82 ML features
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: THEME.white,
+            borderRadius: "20px",
+            border: `1px solid ${THEME.borderLight}`,
+            padding: "20px",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                backgroundColor: "rgba(22, 163, 74, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ClipboardList size={18} color="#16A34A" />
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: THEME.slateGray, textTransform: "uppercase" }}>
+                TABLE 2
+              </p>
+              <h4 style={{ fontSize: "15px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+                assessments
+              </h4>
+            </div>
+          </div>
+          <div className="mt-3">
+            <span style={{ fontSize: "28px", fontWeight: 700, color: THEME.ink }}>
+              {assessments.length > 0 ? assessments.length : "Active"}
+            </span>
+            <p style={{ fontSize: "12px", color: THEME.slateGray, margin: "2px 0 0" }}>
+              Loan officer form submissions with JSON payloads
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: THEME.white,
+            borderRadius: "20px",
+            border: `1px solid ${THEME.borderLight}`,
+            padding: "20px",
+          }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "10px",
+                backgroundColor: "rgba(243, 115, 56, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Cpu size={18} color={THEME.lightSignalOrange} />
+            </div>
+            <div>
+              <p style={{ fontSize: "11px", fontWeight: 700, color: THEME.slateGray, textTransform: "uppercase" }}>
+                TABLE 3
+              </p>
+              <h4 style={{ fontSize: "15px", fontWeight: 600, color: THEME.ink, margin: 0 }}>
+                predictions
+              </h4>
+            </div>
+          </div>
+          <div className="mt-3">
+            <span style={{ fontSize: "28px", fontWeight: 700, color: THEME.ink }}>
+              {predictions.length > 0 ? predictions.length : "Active"}
+            </span>
+            <p style={{ fontSize: "12px", color: THEME.slateGray, margin: "2px 0 0" }}>
+              10-Fold LightGBM ensemble inferences & SHAP values
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 mb-4 border-b pb-3" style={{ borderColor: THEME.borderLight }}>
+        <button
+          onClick={() => setActiveTab("predictions")}
+          style={{
+            padding: "8px 18px",
+            borderRadius: "999px",
+            fontSize: "13.5px",
+            fontWeight: 600,
+            border: "none",
+            backgroundColor: activeTab === "predictions" ? THEME.ink : "transparent",
+            color: activeTab === "predictions" ? "#FFFFFF" : THEME.slateGray,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          Recent Predictions Log ({predictions.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("assessments")}
+          style={{
+            padding: "8px 18px",
+            borderRadius: "999px",
+            fontSize: "13.5px",
+            fontWeight: 600,
+            border: "none",
+            backgroundColor: activeTab === "assessments" ? THEME.ink : "transparent",
+            color: activeTab === "assessments" ? "#FFFFFF" : THEME.slateGray,
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+          }}
+        >
+          Recent Assessments Ingestion ({assessments.length})
+        </button>
+      </div>
+
+      {/* Table Data Container */}
+      <div
+        style={{
+          backgroundColor: THEME.white,
+          borderRadius: "20px",
+          border: `1px solid ${THEME.borderLight}`,
+          overflow: "hidden",
+        }}
+      >
+        {activeTab === "predictions" ? (
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr style={{ backgroundColor: THEME.canvas, borderBottom: `1px solid ${THEME.borderLight}` }}>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Prediction ID</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Applicant ID</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Credit Score</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Default Prob (PD)</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Risk Band</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Model Version</th>
+                  <th style={{ padding: "12px 16px", textAlign: "right", fontWeight: 600, color: THEME.ink }}>Recorded At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {predictions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ padding: "32px", textAlign: "center", color: THEME.slateGray }}>
+                      {loading ? "Fetching live records from Supabase..." : "No prediction records found yet."}
+                    </td>
+                  </tr>
+                ) : (
+                  predictions.map((p, i) => (
+                    <tr key={p.id || i} style={{ borderBottom: `1px solid ${THEME.borderLight}` }}>
+                      <td style={{ padding: "12px 16px", fontFamily: "monospace", color: THEME.slateGray }}>
+                        {p.id ? p.id.slice(0, 8) + "..." : "local-pred"}
+                      </td>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, color: THEME.ink }}>
+                        #{p.applicant_id}
+                      </td>
+                      <td style={{ padding: "12px 16px", fontWeight: 700, color: THEME.ink }}>
+                        {p.credit_score}
+                      </td>
+                      <td style={{ padding: "12px 16px", color: THEME.ink }}>
+                        {p.default_probability_percent}%
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span
+                          style={{
+                            padding: "3px 10px",
+                            borderRadius: "999px",
+                            fontSize: "11.5px",
+                            fontWeight: 600,
+                            backgroundColor:
+                              p.risk_band === "Good" || p.risk_band === "Excellent"
+                                ? "rgba(22, 163, 74, 0.12)"
+                                : p.risk_band === "Fair" || p.risk_band === "Moderate"
+                                ? "rgba(243, 115, 56, 0.15)"
+                                : "rgba(220, 38, 38, 0.12)",
+                            color:
+                              p.risk_band === "Good" || p.risk_band === "Excellent"
+                                ? "#16A34A"
+                                : p.risk_band === "Fair" || p.risk_band === "Moderate"
+                                ? THEME.clayBrown
+                                : THEME.red,
+                          }}
+                        >
+                          {p.risk_band}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px 16px", fontSize: "12px", color: THEME.slateGray }}>
+                        {p.model_version}
+                      </td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontSize: "12px", color: THEME.slateGray }}>
+                        {p.created_at ? new Date(p.created_at).toLocaleTimeString() : "Just now"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr style={{ backgroundColor: THEME.canvas, borderBottom: `1px solid ${THEME.borderLight}` }}>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Assessment ID</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Customer ID</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Applicant ID</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>DTI Ratio</th>
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600, color: THEME.ink }}>Status</th>
+                  <th style={{ padding: "12px 16px", textAlign: "right", fontWeight: 600, color: THEME.ink }}>Ingested At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assessments.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ padding: "32px", textAlign: "center", color: THEME.slateGray }}>
+                      {loading ? "Fetching live records from Supabase..." : "No assessment records found yet."}
+                    </td>
+                  </tr>
+                ) : (
+                  assessments.map((a, i) => (
+                    <tr key={a.id || i} style={{ borderBottom: `1px solid ${THEME.borderLight}` }}>
+                      <td style={{ padding: "12px 16px", fontFamily: "monospace", color: THEME.slateGray }}>
+                        {a.id.slice(0, 8)}...
+                      </td>
+                      <td style={{ padding: "12px 16px", fontWeight: 600, color: THEME.ink }}>
+                        {a.customer_id || "N/A"}
+                      </td>
+                      <td style={{ padding: "12px 16px", color: THEME.ink }}>
+                        {a.applicant_id ? `#${a.applicant_id}` : "—"}
+                      </td>
+                      <td style={{ padding: "12px 16px", color: THEME.ink }}>
+                        {a.dti !== null && a.dti !== undefined ? `${a.dti}%` : "—"}
+                      </td>
+                      <td style={{ padding: "12px 16px" }}>
+                        <span
+                          style={{
+                            padding: "3px 10px",
+                            borderRadius: "999px",
+                            fontSize: "11.5px",
+                            fontWeight: 600,
+                            backgroundColor: "rgba(22, 163, 74, 0.12)",
+                            color: "#16A34A",
+                          }}
+                        >
+                          {a.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontSize: "12px", color: THEME.slateGray }}>
+                        {a.created_at ? new Date(a.created_at).toLocaleTimeString() : "Just now"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Judge Dashboard ────────────────────────────────────────────────────
 export default function JudgeDashboard() {
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
@@ -1103,7 +1511,7 @@ export default function JudgeDashboard() {
 
   const handleExport = () => {
     alert(
-      "Generating Model Audit Dossier PDF...\nCrediNove AI Model Validation · XGBoost Ensemble v3.2.1 · Q3 2026"
+      "Generating Model Audit Dossier PDF...\nCrediNova AI Model Validation · XGBoost Ensemble v3.2.1 · Q3 2026"
     );
   };
 
@@ -1142,6 +1550,7 @@ export default function JudgeDashboard() {
         <AltDataImpact />
         <SHAPChart />
         <FairnessAudit />
+        <SupabaseLiveAudit />
 
         {/* Bottom Actions */}
         <div

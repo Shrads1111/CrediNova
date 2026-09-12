@@ -1,245 +1,330 @@
+/**
+ * scoringEngine.ts
+ *
+ * Simulation-only credit scoring engine for the CrediNova frontend demo.
+ *
+ * Input:  ApplicantFormData  (CSV-keyed fields)
+ * Output: AssessmentResult   (score, risk band, explanations, trend data)
+ *
+ * IMPORTANT: This is a front-end simulation used while the ML backend is not
+ * yet connected.  The actual LightGBM ensemble in HomeCreditProject/ will
+ * replace this computation.  The function signature must remain stable so
+ * the context's generateScore() needs no changes when the backend is wired in.
+ */
+
 import {
-  PersonalData,
-  FinancialData,
-  TransactionData,
-  PaymentData,
+  ApplicantFormData,
   AssessmentResult,
   ScoreBarItem,
   SuggestionItem,
 } from "../types/assessment";
 
-export function calculateCreditScore(
-  personal: PersonalData,
-  financial: FinancialData,
-  transaction: TransactionData,
-  payment: PaymentData,
-  dti: number | null
-): AssessmentResult {
-  const income = parseFloat(financial.monthlyIncome.replace(/,/g, "")) || 50000;
-  const expenses = parseFloat(financial.monthlyExpenses.replace(/,/g, "")) || 20000;
-  const savings = parseFloat(financial.savings.replace(/,/g, "")) || 100000;
-  const bounced = parseInt(transaction.bouncedPayments || "0", 10);
-  const upi = payment.upiActivity || 50;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  // 1. Traditional Credit Score baseline
-  let baseScore = 650;
+function num(value: string | undefined): number {
+  return parseFloat(String(value ?? "")) || 0;
+}
 
-  // Repayment history impact
-  if (payment.repaymentHistory.includes("Excellent")) baseScore += 80;
-  else if (payment.repaymentHistory.includes("Good")) baseScore += 50;
-  else if (payment.repaymentHistory.includes("Fair")) baseScore += 10;
-  else if (payment.repaymentHistory.includes("Poor")) baseScore -= 60;
-  else if (payment.repaymentHistory.includes("Default")) baseScore -= 140;
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
 
-  // 2. DTI impact
-  const actualDti = dti !== null ? dti : 30;
-  if (actualDti < 25) baseScore += 45;
-  else if (actualDti <= 35) baseScore += 25;
-  else if (actualDti <= 45) baseScore += 5;
-  else if (actualDti <= 60) baseScore -= 35;
-  else baseScore -= 70;
+// ─── Main scoring function ────────────────────────────────────────────────────
 
-  // 3. Savings buffer (savings / monthly expenses)
-  const expenseRatio = savings / (expenses || 1);
-  if (expenseRatio > 6) baseScore += 35;
-  else if (expenseRatio >= 3) baseScore += 20;
-  else if (expenseRatio < 1) baseScore -= 20;
+export function calculateCreditScore(data: ApplicantFormData): AssessmentResult {
 
-  // 4. Transaction behavior & trend
-  if (transaction.balanceTrend === "Growing") baseScore += 30;
-  else if (transaction.balanceTrend === "Stable") baseScore += 15;
-  else if (transaction.balanceTrend === "Declining") baseScore -= 25;
+  // ── Parse CSV-keyed fields ─────────────────────────────────────────────────
+  const income       = num(data.AMT_INCOME_TOTAL);
+  const credit       = num(data.AMT_CREDIT);
+  const annuity      = num(data.AMT_ANNUITY);
+  const ext1         = num(data.EXT_SOURCE_1);
+  const ext2         = num(data.EXT_SOURCE_2);
+  const ext3         = num(data.EXT_SOURCE_3);
+  const def30        = num(data.DEF_30_CNT_SOCIAL_CIRCLE);
+  const def60        = num(data.DEF_60_CNT_SOCIAL_CIRCLE);
+  const bureauQtr    = num(data.AMT_REQ_CREDIT_BUREAU_QRT);
+  const regionRating = num(data.REGION_RATING_CLIENT);         // 1=best, 3=worst
+  const daysBirth    = num(data.DAYS_BIRTH);                   // negative
+  const daysEmployed = num(data.DAYS_EMPLOYED);                // negative
 
-  // Bounced payments penalty
-  if (bounced === 0) baseScore += 25;
-  else if (bounced === 1) baseScore -= 20;
-  else if (bounced >= 2) baseScore -= 50;
+  // ── Derived values ─────────────────────────────────────────────────────────
+  const ageYears         = Math.abs(daysBirth) / 365;
+  const employedYears    = Math.abs(daysEmployed) / 365;
+  const annuityToIncome  = income > 0 ? annuity / income : 0;
+  const creditToIncome   = income > 0 ? credit / income : 0;
 
-  // 5. Utility & Alternative digital data signals
-  let utilityCount = 0;
-  if (payment.electricity) utilityCount++;
-  if (payment.water) utilityCount++;
-  if (payment.mobileInternet) utilityCount++;
-  baseScore += utilityCount * 12; // up to +36 pts
+  // ── EXT_SOURCE composite (primary model signal) ────────────────────────────
+  // Average of available external risk indicators — higher means lower risk.
+  const extValues = [ext1, ext2, ext3].filter((v) => v > 0);
+  const extMean   = extValues.length > 0
+    ? extValues.reduce((a, b) => a + b, 0) / extValues.length
+    : 0.5;
 
-  // UPI activity score
-  if (upi > 70) baseScore += 20;
-  else if (upi >= 40) baseScore += 10;
+  // ── Baseline score ─────────────────────────────────────────────────────────
+  let score = 600;
 
-  // Clamp final score between 300 and 990 (max 1000)
-  const creditScore = Math.min(960, Math.max(340, Math.round(baseScore)));
+  // 1. External risk indicators (biggest driver, mirrors ML model)
+  //    extMean 0→1 maps to −120…+180 shift
+  score += Math.round((extMean - 0.5) * 300);
 
-  // Risk band & level
-  let riskLevel: "LOW RISK" | "MEDIUM RISK" | "HIGH RISK" = "LOW RISK";
-  let riskColor = "#22C55E";
-  let recommendation: "APPROVE" | "CONDITIONAL APPROVE" | "MANUAL REVIEW" = "APPROVE";
-  let recommendationSubtitle = "High confidence · Score Band A+";
-  let scoreBand = "Very Good";
+  // 2. Annuity / income burden
+  if      (annuityToIncome < 0.10) score += 60;
+  else if (annuityToIncome < 0.20) score += 30;
+  else if (annuityToIncome < 0.30) score += 10;
+  else if (annuityToIncome < 0.40) score -= 20;
+  else if (annuityToIncome < 0.50) score -= 50;
+  else                              score -= 90;
+
+  // 3. Credit / income ratio
+  if      (creditToIncome < 2)  score += 40;
+  else if (creditToIncome < 4)  score += 15;
+  else if (creditToIncome < 6)  score -= 15;
+  else if (creditToIncome < 10) score -= 40;
+  else                          score -= 70;
+
+  // 4. Social circle defaults (negative signal)
+  score -= (def30 + def60) * 12;
+
+  // 5. Bureau enquiry activity (too many = negative)
+  if      (bureauQtr === 0) score += 20;
+  else if (bureauQtr <= 2)  score += 5;
+  else if (bureauQtr <= 5)  score -= 15;
+  else                      score -= 35;
+
+  // 6. Regional credit rating (1=best, 3=worst)
+  if      (regionRating === 1) score += 25;
+  else if (regionRating === 3) score -= 30;
+
+  // 7. Age signal (very young or very old = slightly higher risk)
+  if      (ageYears >= 35 && ageYears <= 55) score += 20;
+  else if (ageYears >= 25 && ageYears < 35)  score += 10;
+  else if (ageYears < 22 || ageYears > 65)   score -= 20;
+
+  // 8. Employment stability
+  if      (employedYears >= 5)  score += 30;
+  else if (employedYears >= 2)  score += 15;
+  else if (employedYears >= 1)  score += 5;
+  else if (employedYears <= 0)  score -= 25;
+
+  // 9. Income type bonus
+  const incomeType = (data.NAME_INCOME_TYPE ?? "").toLowerCase();
+  if      (incomeType.includes("state"))       score += 20;
+  else if (incomeType.includes("commercial"))  score += 15;
+  else if (incomeType.includes("working"))     score += 10;
+  else if (incomeType.includes("pension"))     score += 5;
+  else if (incomeType.includes("unemployed"))  score -= 60;
+
+  // 10. Education bonus
+  const edu = (data.NAME_EDUCATION_TYPE ?? "").toLowerCase();
+  if      (edu.includes("academic"))           score += 25;
+  else if (edu.includes("higher"))             score += 15;
+  else if (edu.includes("incomplete higher"))  score += 5;
+  else if (edu.includes("lower"))              score -= 20;
+
+  // Clamp to 300–960
+  const creditScore = clamp(Math.round(score), 300, 960);
+
+  // ── Risk / recommendation ──────────────────────────────────────────────────
+  let riskLevel: "LOW RISK" | "MEDIUM RISK" | "HIGH RISK";
+  let riskColor: string;
+  let recommendation: "APPROVE" | "CONDITIONAL APPROVE" | "MANUAL REVIEW";
+  let recommendationSubtitle: string;
+  let scoreBand: string;
 
   if (creditScore >= 850) {
     scoreBand = "Exceptional";
-    riskLevel = "LOW RISK";
-    riskColor = "#22C55E";
+    riskLevel = "LOW RISK"; riskColor = "#22C55E";
     recommendation = "APPROVE";
-    recommendationSubtitle = "Exceptional credit profile · Automatic Fast-track Approval";
+    recommendationSubtitle = "Exceptional credit profile · Automatic fast-track approval";
   } else if (creditScore >= 740) {
     scoreBand = "Very Good";
-    riskLevel = "LOW RISK";
-    riskColor = "#22C55E";
+    riskLevel = "LOW RISK"; riskColor = "#22C55E";
     recommendation = "APPROVE";
     recommendationSubtitle = "High confidence · Score Band A+";
   } else if (creditScore >= 670) {
     scoreBand = "Good";
-    riskLevel = "MEDIUM RISK";
-    riskColor = "#F59E0B";
+    riskLevel = "MEDIUM RISK"; riskColor = "#F59E0B";
     recommendation = "CONDITIONAL APPROVE";
     recommendationSubtitle = "Standard terms recommended · Secondary guarantor advised";
   } else if (creditScore >= 580) {
     scoreBand = "Fair";
-    riskLevel = "MEDIUM RISK";
-    riskColor = "#F59E0B";
+    riskLevel = "MEDIUM RISK"; riskColor = "#F59E0B";
     recommendation = "CONDITIONAL APPROVE";
     recommendationSubtitle = "Requires collateral or structured repayment conditions";
   } else {
     scoreBand = "Poor";
-    riskLevel = "HIGH RISK";
-    riskColor = "#EF4444";
+    riskLevel = "HIGH RISK"; riskColor = "#EF4444";
     recommendation = "MANUAL REVIEW";
     recommendationSubtitle = "Manual underwriting required due to elevated risk indicators";
   }
 
-  // Probability of default based on score
-  const defaultProbNum = Math.max(
-    0.8,
-    Math.min(18.5, +((1000 - creditScore) / 1000 * 12.5).toFixed(1))
+  // ── Default probability ────────────────────────────────────────────────────
+  const defaultProbNum = clamp(
+    parseFloat(((1000 - creditScore) / 1000 * 14).toFixed(1)),
+    0.5,
+    22,
   );
   const defaultProbability = `${defaultProbNum}%`;
-  const defaultDelta = `${(defaultProbNum * 0.15).toFixed(1)}%`;
+  const defaultDelta       = `${(defaultProbNum * 0.12).toFixed(1)}%`;
 
-  // Loan eligibility calculation based on income and score
-  const multiplier = creditScore >= 750 ? 10 : creditScore >= 650 ? 7 : 4;
-  const minEligible = Math.round((income * multiplier * 0.7) / 50000) * 50000;
-  const maxEligible = Math.round((income * multiplier * 1.2) / 50000) * 50000;
-  const eligibleAmountMin = `₹${minEligible.toLocaleString("en-IN")}`;
-  const eligibleAmountMax = `₹${maxEligible.toLocaleString("en-IN")}`;
-  const recommendedTenure = creditScore >= 700 ? "36–48 months" : "12–24 months";
+  // ── Loan eligibility ───────────────────────────────────────────────────────
+  // Use the actual credit amount from the dataset when available
+  const baseEligible = credit > 0 ? credit : income * (creditScore >= 750 ? 8 : creditScore >= 650 ? 5 : 3);
+  const minEligible  = Math.round((baseEligible * 0.8)  / 10000) * 10000;
+  const maxEligible  = Math.round((baseEligible * 1.15) / 10000) * 10000;
+  const eligibleAmountMin  = minEligible.toLocaleString();
+  const eligibleAmountMax  = maxEligible.toLocaleString();
+  const recommendedTenure  = creditScore >= 700 ? "36–60 months" : "12–36 months";
 
-  // Dynamic factor score bars
-  const tradPct = Math.min(95, Math.max(40, Math.round((creditScore / 1000) * 105)));
-  const incomePct = Math.min(98, Math.max(50, Math.round(actualDti < 40 ? 92 : 68)));
-  const txnPct = Math.min(95, Math.max(45, transaction.balanceTrend === "Growing" ? 88 : transaction.balanceTrend === "Stable" ? 72 : 55));
-  const utilityPct = Math.min(98, Math.max(40, utilityCount === 3 ? 96 : utilityCount === 2 ? 78 : 50));
-  const digitalPct = Math.min(95, Math.max(35, upi));
+  // ── Score bars (factor attribution) ───────────────────────────────────────
+  const extPct      = clamp(Math.round(extMean * 100), 5, 98);
+  const incomePct   = clamp(Math.round((1 - clamp(annuityToIncome, 0, 1)) * 95), 20, 98);
+  const creditPct   = clamp(Math.round((1 - clamp(creditToIncome / 15, 0, 1)) * 90), 20, 95);
+  const socialPct   = clamp(Math.round((1 - clamp((def30 + def60) / 10, 0, 1)) * 95), 20, 98);
+  const regionalPct = clamp(Math.round(((4 - regionRating) / 3) * 90), 25, 95);
 
   const scoreBars: ScoreBarItem[] = [
-    { label: "Traditional Credit", value: "25%", pct: tradPct, color: "#0EA5A0" },
-    { label: "Income Stability", value: "25%", pct: incomePct, color: "#14B8A6" },
-    { label: "Transaction Behavior", value: "20%", pct: txnPct, color: "#0EA5A0" },
-    { label: "Utility Payments", value: "15%", pct: utilityPct, color: "#22C55E" },
-    { label: "Digital Payments", value: "15%", pct: digitalPct, color: "#22C55E" },
+    { label: "External Risk Indicators", value: "30%", pct: extPct,      color: "#0EA5A0" },
+    { label: "Income & Annuity Burden",  value: "25%", pct: incomePct,   color: "#14B8A6" },
+    { label: "Credit Utilisation",       value: "20%", pct: creditPct,   color: "#0EA5A0" },
+    { label: "Social Circle Risk",       value: "15%", pct: socialPct,   color: "#22C55E" },
+    { label: "Regional Credit Climate",  value: "10%", pct: regionalPct, color: "#22C55E" },
   ];
 
-  // Dynamic Positives
+  // ── Positive factors ───────────────────────────────────────────────────────
   const positives: string[] = [];
-  if (utilityCount >= 2) {
-    positives.push(`Consistent utility payments across ${utilityCount} services (electricity, water, telecom)`);
+
+  if (extMean >= 0.6) {
+    positives.push(
+      `Strong external risk composite (${extMean.toFixed(3)}) signals low historical default likelihood.`
+    );
+  } else if (extMean >= 0.4) {
+    positives.push(
+      `Moderate external risk composite (${extMean.toFixed(3)}) within acceptable risk threshold.`
+    );
   }
-  if (actualDti < 35) {
-    positives.push(`Healthy debt-to-income ratio (${actualDti}%), well below the 40% prudential ceiling`);
-  } else {
-    positives.push("Verified recurring monthly income across active accounts");
+
+  if (annuityToIncome > 0 && annuityToIncome < 0.25) {
+    positives.push(
+      `Healthy annuity-to-income ratio of ${(annuityToIncome * 100).toFixed(1)}% — well within prudential ceiling.`
+    );
   }
-  if (transaction.balanceTrend === "Growing" || transaction.balanceTrend === "Stable") {
-    positives.push(`${transaction.balanceTrend} average quarterly balance with regular transaction frequency`);
+
+  if (employedYears >= 3) {
+    positives.push(
+      `${employedYears.toFixed(1)} years of continuous employment demonstrates income stability.`
+    );
   }
-  if (upi >= 50) {
-    positives.push("Robust digital UPI transaction footprint demonstrating active liquidity");
+
+  if (def30 === 0 && def60 === 0) {
+    positives.push("Zero defaults observed in applicant's immediate social circle.");
   }
-  if (payment.repaymentHistory.includes("Excellent") || payment.repaymentHistory.includes("Good")) {
-    positives.push("Punctual loan and credit facility repayment track record");
+
+  if (bureauQtr === 0) {
+    positives.push("No credit bureau enquiries in the current quarter — low credit-seeking behaviour.");
   }
+
+  if (regionRating === 1) {
+    positives.push("Applicant resides in a top-rated regional credit zone.");
+  }
+
   while (positives.length < 3) {
-    positives.push("Verified digital identity and institutional KYC compliance");
+    positives.push("Verified applicant classification consistent with institutional lending criteria.");
   }
 
-  // Dynamic Risks
+  // ── Risk flags ─────────────────────────────────────────────────────────────
   const risks: string[] = [];
-  if (actualDti >= 40) {
-    risks.push(`Elevated EMI burden (${actualDti}% of monthly income)`);
+
+  if (annuityToIncome >= 0.35) {
+    risks.push(
+      `Elevated annuity burden (${(annuityToIncome * 100).toFixed(1)}% of income) increases repayment stress probability.`
+    );
   }
-  if (bounced > 0) {
-    risks.push(`${bounced} bounced transaction${bounced > 1 ? "s" : ""} recorded over recent months`);
+
+  if (def30 > 0 || def60 > 0) {
+    risks.push(
+      `${def30 + def60} default event${def30 + def60 > 1 ? "s" : ""} recorded in applicant's social circle.`
+    );
   }
-  if (transaction.balanceTrend === "Declining") {
-    risks.push("Downward trajectory in monthly closing balance detected");
+
+  if (bureauQtr > 3) {
+    risks.push(`${bureauQtr} credit bureau enquiries in a single quarter — elevated credit-seeking activity.`);
   }
-  if (utilityCount < 2) {
-    risks.push("Limited utility payment verification signals submitted");
+
+  if (extMean < 0.4) {
+    risks.push(`External risk composite (${extMean.toFixed(3)}) below safe threshold — elevated default signal.`);
   }
-  if (savings < expenses) {
-    risks.push("Liquid savings buffer below 2 months of operating expenses");
+
+  if (regionRating === 3) {
+    risks.push("Applicant's region carries the lowest regional credit rating.");
   }
+
   if (risks.length === 0) {
-    risks.push("Minor volatility in month-to-month discretionary expenditure");
-    risks.push("Thin credit file in non-traditional unsecured lending instruments");
-    risks.push("Slight increase in short-term credit utilization (+4% MoM)");
+    risks.push("Minor volatility in external risk score composition across three sources.");
+    risks.push("Credit-to-income ratio slightly elevated relative to optimal benchmark.");
+    risks.push("Limited credit bureau history may reduce model confidence.");
   } else if (risks.length === 1) {
-    risks.push("Moderate seasonal cashflow variance during holiday quarters");
-    risks.push("Credit inquiry velocity slightly elevated in recent 60 days");
+    risks.push("Moderate credit-to-income ratio warrants close debt-service monitoring.");
+    risks.push("Income type classification may limit bureau data availability.");
   } else if (risks.length === 2) {
-    risks.push("Limited long-term collateral coverage for high-ticket tenures");
+    risks.push("Limited credit tenure reduces long-term predictability of repayment behaviour.");
   }
 
-  // AI Narrative Explanation
-  const name = personal.fullName || "Applicant";
-  const occ = personal.occupation || "Professional";
-  const aiExplanation = `${name}'s credit score of ${creditScore} out of 1000 reflects a ${
-    creditScore >= 740 ? "financially responsible profile with strong alternative signals" : "moderate risk profile requiring structured debt covenants"
-  }. Operating as a ${occ}, our AI model calibrated bureau records alongside ${utilityCount} utility verifications and digital UPI activity (index ${upi}/100). The model recommends ${recommendation} with ${
-    creditScore >= 740 ? "high" : "conditional"
-  } confidence based on a predicted default probability of ${defaultProbability}. Debt-to-income is calculated at ${actualDti}%. Recommended credit facility is assessed in the range of ${eligibleAmountMin} to ${eligibleAmountMax} with ${recommendedTenure} tenure.`;
+  // ── AI narrative explanation ───────────────────────────────────────────────
+  const applicantLabel = data.SK_ID_CURR ? `Applicant #${data.SK_ID_CURR}` : "This applicant";
+  const aiExplanation =
+    `${applicantLabel}'s composite credit score of ${creditScore} out of 1000 reflects a ` +
+    `${creditScore >= 740 ? "financially responsible profile with manageable risk indicators" : "moderate risk profile requiring structured credit terms"}. ` +
+    `The AI model calibrated the external risk composite (mean ${extMean.toFixed(3)}) alongside ` +
+    `income and annuity parameters. ` +
+    `The annuity-to-income ratio stands at ${(annuityToIncome * 100).toFixed(1)}%, ` +
+    `and ${def30 + def60} social-circle default event${def30 + def60 !== 1 ? "s" : ""} were recorded. ` +
+    `The model recommends ${recommendation} with ${creditScore >= 740 ? "high" : "conditional"} ` +
+    `confidence. Recommended loan facility range: ${eligibleAmountMin}–${eligibleAmountMax} ` +
+    `with ${recommendedTenure} tenure.`;
 
-  // Score Trend Data
+  // ── Score trend (simulated 6-month trajectory) ────────────────────────────
+  const scoreDelta = clamp(Math.round(extMean * 80 - 10), -30, 80);
   const trendData = [
-    { month: "Apr", score: Math.round(creditScore - 58) },
-    { month: "May", score: Math.round(creditScore - 44) },
-    { month: "Jun", score: Math.round(creditScore - 31) },
-    { month: "Jul", score: Math.round(creditScore - 22) },
-    { month: "Aug", score: Math.round(creditScore - 8) },
+    { month: "Apr", score: Math.max(300, creditScore - scoreDelta) },
+    { month: "May", score: Math.max(300, creditScore - Math.round(scoreDelta * 0.75)) },
+    { month: "Jun", score: Math.max(300, creditScore - Math.round(scoreDelta * 0.55)) },
+    { month: "Jul", score: Math.max(300, creditScore - Math.round(scoreDelta * 0.35)) },
+    { month: "Aug", score: Math.max(300, creditScore - Math.round(scoreDelta * 0.15)) },
     { month: "Sep", score: creditScore },
   ];
 
-  // Improvement Suggestions
+  // ── Suggestions ───────────────────────────────────────────────────────────
   const suggestions: SuggestionItem[] = [
     {
-      title: actualDti > 35 ? "Reduce Debt-to-Income Burden" : "Maintain Optimal DTI Ratio",
-      desc: actualDti > 35
-        ? `Consolidate outstanding EMI obligations to bring DTI from ${actualDti}% under 35% for maximum borrowing power.`
-        : "Keep EMI obligations below 35% of gross monthly income to sustain premium credit terms.",
+      title:
+        annuityToIncome >= 0.30
+          ? "Reduce Annuity-to-Income Burden"
+          : "Maintain Healthy Repayment Ratio",
+      desc:
+        annuityToIncome >= 0.30
+          ? `Current annuity-to-income ratio of ${(annuityToIncome * 100).toFixed(1)}% is above the 30% benchmark. Restructuring loan terms could improve the score.`
+          : "Keep annuity obligations below 25% of annual income to maximise borrowing headroom.",
     },
     {
-      title: "Continue Timely Utility Payments",
-      desc: "Maintain 100% on-time electricity, water, and telecom payments — alternative data reinforces your score significantly.",
+      title: "Minimise Pre-Application Bureau Enquiries",
+      desc: "Limit credit bureau enquiries to fewer than 3 per quarter. Each additional enquiry signals credit-seeking behaviour to lenders.",
     },
     {
-      title: "Stabilize Account Cash Flow",
-      desc: "Sustaining a consistent monthly closing balance buffer reduces AI cash flow volatility flags.",
+      title: "Strengthen External Risk Profile",
+      desc: "Maintaining consistent repayment behaviour across existing credit facilities improves the EXT_SOURCE indicators that carry the highest model weight.",
     },
   ];
 
-  const applicantId = personal.customerId || `CRD-${Math.floor(100000 + Math.random() * 900000)}`;
-  const assessmentDate = new Date().toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
+  // ── Assemble result ────────────────────────────────────────────────────────
   return {
-    applicantId,
-    assessmentDate,
+    applicantId:          data.SK_ID_CURR || `CRD-${Math.floor(100000 + Math.random() * 900000)}`,
+    assessmentDate:       new Date().toLocaleDateString("en-GB", {
+                            day: "2-digit", month: "short", year: "numeric",
+                          }),
     creditScore,
-    maxScore: 1000,
-    scoreDelta: 58,
+    maxScore:             1000,
+    scoreDelta:           Math.abs(scoreDelta),
     scoreBand,
     riskLevel,
     riskColor,
@@ -251,17 +336,11 @@ export function calculateCreditScore(
     recommendation,
     recommendationSubtitle,
     scoreBars,
-    positives: positives.slice(0, 3),
-    risks: risks.slice(0, 3),
+    positives:            positives.slice(0, 3),
+    risks:                risks.slice(0, 3),
     aiExplanation,
     trendData,
     suggestions,
-    rawAssessment: {
-      personal,
-      financial,
-      transaction,
-      payment,
-      dti: actualDti,
-    },
+    rawApplicant:         { ...data },
   };
 }

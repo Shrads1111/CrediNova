@@ -285,89 +285,13 @@ class HomeCreditPredictor:
         applicant_id: int,
         explain: bool = False
     ) -> dict:
+        """Predict for a given applicant ID using cached demo data.
 
-        # Get applicant features
-        X_row = self._row(
-            applicant_id
-        )
+        This method now delegates to ``_predict_row`` after fetching the row.
+        """
+        X_row = self._row(applicant_id)
+        return self._predict_row(X_row, applicant_id, explain=explain)
 
-        # ----------------------------------------------------
-        # LightGBM predictions from all 10 folds
-        # ----------------------------------------------------
-
-        predictions = []
-
-        for model in self.models:
-
-            prediction = model.predict(
-                X_row
-            )[0]
-
-            predictions.append(
-                float(prediction)
-            )
-
-        # Average the 10 model predictions
-        probability = float(
-            np.mean(predictions)
-        )
-
-        # ----------------------------------------------------
-        # Convert probability to score
-        # ----------------------------------------------------
-
-        score = credit_score(
-            probability
-        )
-
-        # ----------------------------------------------------
-        # Determine risk
-        # ----------------------------------------------------
-
-        risk = risk_band(
-            score
-        )
-
-        # ----------------------------------------------------
-        # API response
-        # ----------------------------------------------------
-
-        result = {
-
-            "SK_ID_CURR": int(
-                applicant_id
-            ),
-
-            "default_probability": round(
-                probability,
-                6
-            ),
-
-            "default_probability_percent": round(
-                probability * 100,
-                2
-            ),
-
-            # THIS IS THE ACTUAL SCORE
-            "credit_score": score,
-
-            # Only tells frontend the scale
-            "score_scale": "300-900",
-
-            "risk_level": risk
-        }
-
-        # ----------------------------------------------------
-        # Optional SHAP explanation
-        # ----------------------------------------------------
-
-        if explain:
-
-            result["shap"] = self.explain(
-                applicant_id
-            )
-
-        return result
 
     # ========================================================
     # SHAP EXPLANATION
@@ -527,6 +451,65 @@ class HomeCreditPredictor:
 
 
 # ============================================================
+    def _predict_row(self, X_row: pd.DataFrame, applicant_id: int, explain: bool = False) -> dict:
+        """Generate prediction dict from a DataFrame row.
+
+        Parameters
+        ----------
+        X_row: pd.DataFrame
+            Single-row DataFrame with feature columns.
+        applicant_id: int
+            The applicant's SK_ID_CURR.
+        explain: bool, default False
+            Whether to include SHAP explanations.
+        """
+        # Ensure float64 for LightGBM compatibility
+        X_row = X_row.astype(np.float64)
+        # Aggregate predictions from all models
+        probs = [model.predict(X_row)[0] for model in self.models]
+        default_probability = float(np.mean(probs))
+        # Compute credit score and risk band
+        credit = credit_score(default_probability)
+        risk = risk_band(credit)
+        result = {
+            "SK_ID_CURR": applicant_id,
+            "default_probability": default_probability,
+            "default_probability_percent": round(default_probability * 100, 2),
+            "credit_score": credit,
+            "risk_level": risk,
+            "model_version": "lightgbm-homecredit-10fold-v1",
+        }
+        if explain:
+            result["shap"] = self.explain(applicant_id)
+        return result
+
+    def predict_from_dict(self, applicant_data: dict, explain: bool = False) -> dict:
+        """Predict using a dictionary of raw applicant fields.
+        For the demo dataset we have a pre‑engineered feature matrix (self.X)
+        that aligns with the model. If the applicant ID exists in the demo
+        cache, we fetch the prepared row via ``self._row`` – this guarantees
+        that the exact same feature engineering (factorisation, NaN handling,
+        etc.) is applied as during training. If the ID is not present, we
+        fall back to the previous behaviour (re‑indexing the raw dict), which
+        is useful when the real Supabase data is available.
+        """
+        applicant_id = int(applicant_data.get("SK_ID_CURR"))
+
+        # Try to locate the applicant in the demo cache (fast path)
+        try:
+            # ``self._row`` returns a DataFrame with the correct feature columns
+            row = self._row(applicant_id)
+            return self._predict_row(row, applicant_id, explain=explain)
+        except ValueError:
+            # Not in demo cache → fall back to raw dict handling
+            df = pd.DataFrame([applicant_data])
+            df = df.reindex(columns=self.feature_columns)
+            return self._predict_row(df, applicant_id, explain=explain)
+
+
+
+
+
 # SINGLETON PREDICTOR
 # ============================================================
 

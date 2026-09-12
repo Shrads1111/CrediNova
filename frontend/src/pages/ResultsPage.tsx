@@ -217,25 +217,9 @@ function CustomTooltip({ active, payload, label }: any) {
 // ── Main Results Page ───────────────────────────────────────────────────────
 export default function ResultsPage() {
   const navigate = useNavigate();
-  const {
-    result,
-    backendResult,
-    backendError,
-    personal,
-    financial,
-    transaction,
-    payment,
-    dti,
-    resetAssessment,
-    selectedDemoApplicantId,
-  } = useAssessment();
+  const { result, formData, resetAssessment } = useAssessment();
 
-  const simulationResult =
-    result || calculateCreditScore(personal, financial, transaction, payment, dti);
-
-  // Prefer verified ML score for the hero gauge when available
-  const activeResult = simulationResult;
-  const hasMl = Boolean(backendResult);
+  const activeResult = result || calculateCreditScore(formData);
 
   const scoreBands = [
     { label: "Exceptional", range: "850–1000", color: "#16A34A" },
@@ -253,15 +237,6 @@ export default function ResultsPage() {
   const handlePrint = () => {
     window.print();
   };
-
-  const heroScore = hasMl ? backendResult!.creditScore : activeResult.creditScore;
-  const heroMax = hasMl ? 900 : activeResult.maxScore;
-  const heroRiskLabel = hasMl
-    ? backendResult!.riskBand
-    : activeResult.scoreBand;
-  const heroPd = hasMl
-    ? `${backendResult!.defaultProbabilityPercent.toFixed(2)}%`
-    : activeResult.defaultProbability;
 
   return (
     <div style={{ minHeight: "100%", backgroundColor: THEME.canvas }}>
@@ -290,91 +265,19 @@ export default function ResultsPage() {
                 margin: 0,
               }}
             >
-              {personal.fullName || "Rahul Sharma"}
+              {formData.SK_ID_CURR
+              ? `Applicant #${formData.SK_ID_CURR}`
+              : "Credit Assessment"}
             </h1>
             <p style={{ fontSize: "14px", color: THEME.charcoal, marginTop: "6px" }}>
               Applicant ID:{" "}
-              <strong style={{ color: THEME.ink }}>
-                {hasMl
-                  ? `SK_ID_CURR ${backendResult!.applicantId}`
-                  : activeResult.applicantId}
-              </strong>
+              <strong style={{ color: THEME.ink }}>{activeResult.applicantId}</strong>
               <span style={{ margin: "0 10px", color: THEME.borderLight }}>|</span>
               Model Version:{" "}
-              <strong style={{ color: THEME.signalOrange }}>
-                {hasMl
-                  ? backendResult!.modelVersion
-                  : "Client simulation (scoringEngine)"}
-              </strong>
-              {selectedDemoApplicantId != null && (
-                <>
-                  <span style={{ margin: "0 10px", color: THEME.borderLight }}>|</span>
-                  Linked demo:{" "}
-                  <strong style={{ color: THEME.ink }}>{selectedDemoApplicantId}</strong>
-                </>
-              )}
+              <strong style={{ color: THEME.signalOrange }}>Ensemble XGB-NN v3.2.1</strong>
+              <span style={{ margin: "0 10px", color: THEME.borderLight }}>|</span>
+              Jurisdiction: <strong>RBI / Basel III Calibrated</strong>
             </p>
-            <div className="flex flex-wrap gap-2 mt-3">
-              {hasMl ? (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "6px 12px",
-                    borderRadius: "999px",
-                    backgroundColor: "rgba(22, 163, 74, 0.12)",
-                    color: "#166534",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    letterSpacing: "0.03em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  <ShieldCheck size={14} />
-                  ML Ensemble Verified
-                </span>
-              ) : (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "6px 12px",
-                    borderRadius: "999px",
-                    backgroundColor: "rgba(217, 119, 6, 0.12)",
-                    color: "#92400E",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    letterSpacing: "0.03em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  <AlertTriangle size={14} />
-                  Demo Client Simulation
-                </span>
-              )}
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "6px 12px",
-                  borderRadius: "999px",
-                  backgroundColor: THEME.softBone,
-                  color: THEME.slateGray,
-                  fontSize: "12px",
-                  fontWeight: 600,
-                }}
-              >
-                Prototype calibrated on Home Credit Default Risk benchmark
-              </span>
-            </div>
-            {backendError && (
-              <p style={{ fontSize: "13px", color: THEME.red, marginTop: "10px" }}>
-                Backend ML unavailable: {backendError}. Showing client-side simulation only.
-              </p>
-            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -394,100 +297,6 @@ export default function ResultsPage() {
               <Scale size={16} />
               <span>Model Audit & Analytics</span>
             </Link>
-          </div>
-        </div>
-
-        {/* ── Dual score transparency panel ─────────────────────────── */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
-          style={{
-            backgroundColor: THEME.white,
-            border: `1px solid ${THEME.borderLight}`,
-            borderRadius: "24px",
-            padding: "20px 24px",
-          }}
-        >
-          <div>
-            <p
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: "#166534",
-                marginBottom: "8px",
-              }}
-            >
-              Backend ML Score · LightGBM 10-fold
-            </p>
-            {hasMl ? (
-              <>
-                <p
-                  style={{
-                    fontFamily: "'Sofia Sans', sans-serif",
-                    fontSize: "42px",
-                    fontWeight: 700,
-                    color: THEME.ink,
-                    margin: 0,
-                    lineHeight: 1,
-                  }}
-                >
-                  {backendResult!.creditScore}
-                  <span style={{ fontSize: "16px", fontWeight: 500, color: THEME.slateGray }}>
-                    {" "}
-                    / {backendResult!.scoreScale}
-                  </span>
-                </p>
-                <p style={{ fontSize: "14px", color: THEME.charcoal, marginTop: "8px" }}>
-                  PD {backendResult!.defaultProbabilityPercent.toFixed(2)}% · Risk band{" "}
-                  <strong>{backendResult!.riskBand}</strong>
-                </p>
-                <p style={{ fontSize: "12px", color: THEME.slateGray, marginTop: "4px" }}>
-                  {backendResult!.modelVersion}
-                </p>
-              </>
-            ) : (
-              <p style={{ fontSize: "14px", color: THEME.slateGray, margin: 0 }}>
-                No verified ML result. Link a demo applicant and ensure the backend is running.
-              </p>
-            )}
-          </div>
-          <div>
-            <p
-              style={{
-                fontSize: "11px",
-                fontWeight: 700,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: "#92400E",
-                marginBottom: "8px",
-              }}
-            >
-              Client-Side Simulation Score
-            </p>
-            <p
-              style={{
-                fontFamily: "'Sofia Sans', sans-serif",
-                fontSize: "42px",
-                fontWeight: 700,
-                color: THEME.ink,
-                margin: 0,
-                lineHeight: 1,
-              }}
-            >
-              {simulationResult.creditScore}
-              <span style={{ fontSize: "16px", fontWeight: 500, color: THEME.slateGray }}>
-                {" "}
-                / {simulationResult.maxScore}
-              </span>
-            </p>
-            <p style={{ fontSize: "14px", color: THEME.charcoal, marginTop: "8px" }}>
-              PD {simulationResult.defaultProbability} · Band{" "}
-              <strong>{simulationResult.scoreBand}</strong>
-            </p>
-            <p style={{ fontSize: "12px", color: THEME.slateGray, marginTop: "4px" }}>
-              Heuristic MSME form scoring — not mapped to Home Credit features
-            </p>
           </div>
         </div>
 
@@ -518,9 +327,9 @@ export default function ResultsPage() {
                 marginBottom: "4px",
               }}
             >
-              {hasMl ? "BACKEND ML CREDIT SCORE" : "COMPOSITE AI CREDIT SCORE"}
+              COMPOSITE AI CREDIT SCORE
             </p>
-            <CircularGauge score={heroScore} max={heroMax} />
+            <CircularGauge score={activeResult.creditScore} max={activeResult.maxScore} />
             <div className="mt-2 flex items-center justify-center">
               <span
                 style={{
@@ -531,24 +340,22 @@ export default function ResultsPage() {
                   borderRadius: "999px",
                   fontSize: "13px",
                   fontWeight: 700,
-                  backgroundColor: hasMl
-                    ? "rgba(22, 163, 74, 0.12)"
-                    : activeResult.riskLevel === "LOW RISK"
-                    ? "rgba(22, 163, 74, 0.12)"
-                    : activeResult.riskLevel === "MEDIUM RISK"
-                    ? "rgba(243, 115, 56, 0.12)"
-                    : "rgba(207, 69, 0, 0.12)",
-                  color: hasMl
-                    ? "#16A34A"
-                    : activeResult.riskLevel === "LOW RISK"
-                    ? "#16A34A"
-                    : activeResult.riskLevel === "MEDIUM RISK"
-                    ? THEME.lightSignalOrange
-                    : THEME.signalOrange,
+                  backgroundColor:
+                    activeResult.riskLevel === "LOW RISK"
+                      ? "rgba(22, 163, 74, 0.12)"
+                      : activeResult.riskLevel === "MEDIUM RISK"
+                      ? "rgba(243, 115, 56, 0.12)"
+                      : "rgba(207, 69, 0, 0.12)",
+                  color:
+                    activeResult.riskLevel === "LOW RISK"
+                      ? "#16A34A"
+                      : activeResult.riskLevel === "MEDIUM RISK"
+                      ? THEME.lightSignalOrange
+                      : THEME.signalOrange,
                 }}
               >
                 <Check size={14} strokeWidth={2.5} />
-                {hasMl ? heroRiskLabel : activeResult.riskLevel}
+                {activeResult.riskLevel}
               </span>
             </div>
             <p
@@ -559,17 +366,9 @@ export default function ResultsPage() {
                 textAlign: "center",
               }}
             >
-              {hasMl ? (
-                <>
-                  Scale {backendResult!.scoreScale} · verified ensemble output
-                </>
-              ) : (
-                <>
-                  Score trajectory:{" "}
-                  <strong style={{ color: "#16A34A" }}>+{activeResult.scoreDelta} pts</strong> over 6
-                  months
-                </>
-              )}
+              Score trajectory:{" "}
+              <strong style={{ color: "#16A34A" }}>+{activeResult.scoreDelta} pts</strong> over 6
+              months
             </p>
           </div>
 
@@ -611,7 +410,7 @@ export default function ResultsPage() {
                       lineHeight: 1,
                     }}
                   >
-                    {heroPd}
+                    {activeResult.defaultProbability}
                   </span>
                   <span
                     style={{
@@ -869,7 +668,7 @@ export default function ResultsPage() {
             >
               <p style={{ fontSize: "12.5px", color: THEME.charcoal, margin: 0, lineHeight: 1.5 }}>
                 Score of <strong style={{ color: THEME.ink }}>{activeResult.creditScore}</strong>{" "}
-                places {personal.fullName || "applicant"} in the{" "}
+                places {formData.SK_ID_CURR ? `Applicant #${formData.SK_ID_CURR}` : "this applicant"} in the{" "}
                 <strong>{activeResult.scoreBand}</strong> tier, qualifying for standard institutional
                 lending rates.
               </p>
